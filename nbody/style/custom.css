@@ -3,107 +3,107 @@
 <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:300,400' rel='stylesheet' type='text/css'>
 <style>
     @font-face {
-        font-family: "Computer Modern"; !important
-        src: url('http://mirrors.ctan.org/fonts/cm-unicode/fonts/otf/cmunss.otf');!important
+        font-family: "Computer Modern" !important;
+        src: url('http://mirrors.ctan.org/fonts/cm-unicode/fonts/otf/cmunss.otf') !important;
 }
 
 .prompt{
-    display: none;!important
+    display: none !important;
 }
 
 .rendered_html pre {
-    border: 1px solid #f0f6f9;!important
+    border: 1px solid #f0f6f9 !important;
 }
 
 .rendered_html pre, .rendered_html code {
-    background-color: #d3d8db;!important
-    padding: 1%;!important
-    line-height: 200%;!important
-    border-radius: 10px;!important
+    background-color: #d3d8db !important;
+    padding: 1% !important;
+    line-height: 200% !important;
+    border-radius: 10px !important;
 }
 
 div.input_area {
-    border-radius: 10px;!important
-    background-color: #e1e1e6;!important
+    border-radius: 10px !important;
+    background-color: #e1e1e6 !important;
 }
 
 div.cell{
-        width:85%;!important
+        width:85% !important;
         margin-left:5% !important;
         /*margin-right:auto;*/
     }
     h1, h2, h3, h4, h5 {
-        font-family: 'Alegreya Sans', sans-serif;!important
-        font-style: oblique;!important
+        font-family: 'Alegreya Sans', sans-serif !important;
+        font-style: oblique !important;
     }
     div.text_cell_render{
-        font-family: 'Alegreya Sans',Computer Modern, "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;!important
-        line-height: 135%;!important
-        font-size: 120%;!important
+        font-family: 'Alegreya Sans',Computer Modern, "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif !important;
+        line-height: 135% !important;
+        font-size: 120% !important;
         width:100%;/*600px;*/
         /*margin-left:auto;*/
         /*margin-right:auto;*/
     }
     .CodeMirror{
-            font-family: "Source Code Pro";!important
-			font-size: 100%;!important
+            font-family: "Source Code Pro" !important;
+			font-size: 100% !important;
     }
     .text_cell_render p{
-        text-align: justify;!important
+        text-align: justify !important;
     }
     .text_cell_render h1 {
-        font-weight: 200;!important
-		line-height: 100%;!important
-        color:#47597A;!important
-        margin-bottom: 5.em;!important
-        margin-top: 1.em;!important
-        padding-bottom: 5.em;!important
-        padding-top: 1.em;!important
-        display: block;!important
-        font-size: 400%;!important
-        text-align: center;!important
-        border-bottom: 1px solid #47597A;!important
-        border-top: 1px solid #47597A;!important
+        font-weight: 200 !important;
+		line-height: 100% !important;
+        color:#47597A !important;
+        margin-bottom: 5.em !important;
+        margin-top: 1.em !important;
+        padding-bottom: 5.em !important;
+        padding-top: 1.em !important;
+        display: block !important;
+        font-size: 400% !important;
+        text-align: center !important;
+        border-bottom: 1px solid #47597A !important;
+        border-top: 1px solid #47597A !important;
     }
     .text_cell_render h2 {
-        font-weight: 200;!important
-		line-height: 100%;!important
-        color:#47597A;!important
-        margin-bottom: 0.5em;!important
-        margin-top: 0.5em;!important
-        display: block;!important
-        font-size: 300%;!important
-        border-bottom: 1px solid #47597A;!important
+        font-weight: 200 !important;
+		line-height: 100% !important;
+        color:#47597A !important;
+        margin-bottom: 0.5em !important;
+        margin-top: 0.5em !important;
+        display: block !important;
+        font-size: 300% !important;
+        border-bottom: 1px solid #47597A !important;
     }
     .text_cell_render h3 {
-        font-weight: 200;!important
-		line-height: 100%;!important
-        color:#47597A;!important
-        margin-bottom: 0.5em;!important
-        margin-top: 0.5em;!important
-        display: block;!important
-        font-size: 200%;!important
+        font-weight: 200 !important;
+		line-height: 100% !important;
+        color:#47597A !important;
+        margin-bottom: 0.5em !important;
+        margin-top: 0.5em !important;
+        display: block !important;
+        font-size: 200% !important;
     }
     .text_cell_render h4 {
-        font-style: italic;!important
-        font-weight: bold;!important
-		line-height: 100%;!important
-        color:#47597A;!important
-        display: block;!important
-        font-size: 100%;!important
+        font-style: italic !important;
+        font-weight: bold !important;
+		line-height: 100% !important;
+        color:#47597A !important;
+        display: block !important;
+        font-size: 100% !important;
     }
     .text_cell_render h5 {
-        font-weight: 200;!important
-		line-height: 100%;!important
-        color:#47597A;!important
-        margin-bottom: 0.5em;!important
-        margin-top: 0.5em;!important
-        display: block;!important
-        font-size: 100%;!important
+        font-weight: 200 !important;
+		line-height: 100% !important;
+        color:#47597A !important;
+        margin-bottom: 0.5em !important;
+        margin-top: 0.5em !important;
+        display: block !important;
+        font-size: 100% !important;
     }
-    .text_cell_render ul {list-style-type: square;!important}
+    .text_cell_render ul {list-style-type: square !important;}
     .warning{
-        color: rgb( 240, 20, 20 )!important
+        color: rgb( 240, 20, 20 ) !important;
         }
 </style>
 
