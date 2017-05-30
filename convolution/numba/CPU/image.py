@@ -7,14 +7,17 @@ import numpy as np
 class image(object):
     """
     """
-    def __init__(self,w = 0, h = 0, depth = 1):
+    def __init__(self,w = 0, h = 0, depth = 1, from_array=None):
         """
         Cree une image de w x h pixels et de profondeur depth
         """
-        if depth > 1 :
-            self.__pixels__ = np.zeros((h,w,depth),np.double)
+        if from_array is None:
+            if depth > 1 :
+                self.__pixels__ = np.zeros((h,w,depth),np.double)
+            else:
+                self.__pixels__ = np.zeros((h,w),np.double)
         else:
-            self.__pixels__ = np.zeros((h,w),np.double)
+            self.__pixels__ = from_array
 
     def show(self) :
         """Affiche l'image a l'ecran"""

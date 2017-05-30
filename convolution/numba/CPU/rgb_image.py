@@ -9,12 +9,12 @@ import image as img
 class rgb_image(img.image):
     """
     """
-    def __init__(self, w = 0, h = 0, fileName = None):
+    def __init__(self, w = 0, h = 0, fileName = None, from_array = None):
         """
         Construction d'une image de width x height pixels contenant trois channels R,G et B
         """
         if None == fileName :
-            img.image.__init__(self,w,h,3)
+            img.image.__init__(self,w,h,3, from_array)
         else:
             data = misc.imread(fileName)
             img.image.__init__(self,data.shape[0],data.shape[1],3)
