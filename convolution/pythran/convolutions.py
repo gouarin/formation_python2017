@@ -47,9 +47,9 @@ if __name__ == '__main__':
     from scipy.misc.pilutil import imread
     import gray_image as gimage
     import rgb_image as cimage
-    img = gimage.gray_image(fileName='../../data/lena.png')
-    img_skel = gimage.gray_image(fileName='../../data/squelette.png')
-    cimg = cimage.rgb_image(fileName='../../data/lena_rgb.png')
+    img = gimage.gray_image(fileName='../data/lena.png')
+    img_skel = gimage.gray_image(fileName='../data/squelette.png')
+    cimg = cimage.rgb_image(fileName='../data/lena_rgb.png')
 
     show = len(sys.argv) > 1 and sys.argv[1] == "show"
     if not show:
