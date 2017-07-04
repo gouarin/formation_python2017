@@ -10,7 +10,7 @@ def convolve_mean2(image):
     return out_image
 
 def convolve_mean3(image):
-    height, width = image.shape
+    height, width, dim = image.shape
     out_image = np.empty((height-2,width-2, dim))
     out_image[:, :, :] = 0.25*(image[:-2,1:-1,:]+image[2:,1:-1,:]+image[1:-1,:-2,:]+image[1:-1,2:,:])
     return out_image
