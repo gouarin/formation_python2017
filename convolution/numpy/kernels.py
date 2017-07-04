@@ -49,7 +49,7 @@ def convolve_matrix2(image, convolution_array) :
     ny     = convolution_array.shape[0]
     half_x = nx//2
     half_y = ny//2
-    out_image = np.zeros((height-nx+1,width-ny+1))
+    out_image = np.zeros((height-ny+1,width-nx+1))
     h, w = out_image.shape
 
     for jw in range(0,ny):
@@ -69,7 +69,7 @@ def convolve_matrix3(image, convolution_array) :
     ny     = convolution_array.shape[0]
     half_x = nx//2
     half_y = ny//2
-    out_image = np.zeros((height-nx+1,width-ny+1, dim))
+    out_image = np.zeros((height-ny+1,width-nx+1, dim))
     h, w, d = out_image.shape
 
     for jw in range(0,ny):
