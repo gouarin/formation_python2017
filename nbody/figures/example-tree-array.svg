@@ -15,7 +15,7 @@
    viewBox="0 0 210 297"
    version="1.1"
    id="svg7815"
-   inkscape:version="0.92.1 r15371"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
    sodipodi:docname="example-tree-array.svg"
    inkscape:export-filename="/home/loic/Ecole/2017/Atelier/python/material/nbody/figures/example-tree-array.png"
    inkscape:export-xdpi="96"
@@ -27,16 +27,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="387.48948"
-     inkscape:cy="729.79973"
+     inkscape:zoom="3.959798"
+     inkscape:cx="259.27914"
+     inkscape:cy="713.13911"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1056"
-     inkscape:window-x="1920"
-     inkscape:window-y="24"
+     inkscape:window-width="3840"
+     inkscape:window-height="2049"
+     inkscape:window-x="0"
+     inkscape:window-y="55"
      inkscape:window-maximized="1">
     <inkscape:grid
        id="grid8360"
@@ -174,17 +174,17 @@
        height="7.9375"
        width="7.9375"
        id="rect8362-0-3"
-       style="opacity:1;fill:#afc4d6;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="opacity:1;fill:#d6d6cb;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        id="text8497-7-6"
        y="109.49327"
-       x="75.865952"
+       x="76.602119"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58258343px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.11456487px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"><tspan
          y="109.49327"
-         x="75.865952"
-         id="tspan8807"
-         sodipodi:role="line">-1</tspan></text>
+         x="76.602119"
+         sodipodi:role="line"
+         id="tspan917">7</tspan></text>
     <rect
        y="103.85416"
        x="66.145836"
