@@ -69,9 +69,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('engine', help='target engine')
-    parser.add_argument('--show', action='store_true')
-    parser.add_argument('--vectorize', action='store_true')
-    parser.add_argument('--count', default=10, type=int)
+    parser.add_argument('--show', action='store_true',
+        help='show image after convolution. You may need to set the environment variable SCIPY_PIL_IMAGE_VIEWER to your favorite image viewer.')
+    parser.add_argument('--vectorize', action='store_true', help='use color-depth independant version of the kernels.')
+    parser.add_argument('--count', metavar='COUNT', default=10, type=int, help='repeat COUNT times the convolution when benching.')
     args = parser.parse_args()
 
     sys.path.append(args.engine)
