@@ -137,7 +137,7 @@ if __name__ == '__main__':
     f = matrix(convol, args.vectorize)
     if show:
         print('[blur/grayscale]')
-        output_img = f.convolve(cimg)
+        output_img = f.convolve(img_skel)
         output_img.show()
     else:
         simple_bench('blur/grayscale', lambda: f.convolve(img_skel), args.count)
