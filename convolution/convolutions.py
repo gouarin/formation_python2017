@@ -100,7 +100,13 @@ if __name__ == '__main__':
         output_img = m.convolve(img)
         output_img.show()
     else:
-        simple_bench('mean/color', lambda: m.convolve(img), args.count)
+        simple_bench('mean/grayscale', lambda: m.convolve(img), args.count)
+
+    if show:
+        output_img = m.convolve(cimg)
+        output_img.show()
+    else:
+        simple_bench('mean/color', lambda: m.convolve(cimg), args.count)
 
     # Matrice de convolution pour detection de bord amelioree :
     convol = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]],np.double)
