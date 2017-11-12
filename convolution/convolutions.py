@@ -69,9 +69,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('engine', help='target engine')
-    parser.add_argument('--show', action='store_true')
-    parser.add_argument('--vectorize', action='store_true')
-    parser.add_argument('--count', default=10, type=int)
+    parser.add_argument('--show', action='store_true',
+        help='show image after convolution. You may need to set the environment variable SCIPY_PIL_IMAGE_VIEWER to your favorite image viewer.')
+    parser.add_argument('--vectorize', action='store_true', help='use color-depth independant version of the kernels.')
+    parser.add_argument('--count', metavar='COUNT', default=10, type=int, help='repeat COUNT times the convolution when benching.')
     args = parser.parse_args()
 
     sys.path.append(args.engine)
@@ -84,28 +85,39 @@ if __name__ == '__main__':
     show = args.show
     lapl = laplacien(args.vectorize)
     if show:
+        print('[laplacian/grayscale]')
         output_img = lapl.convolve(img)
         output_img.show()
     else:
-        simple_bench('laplacien/grayscale', lambda: lapl.convolve(img), args.count)
+        simple_bench('laplacian/grayscale', lambda: lapl.convolve(img), args.count)
 
     if show:
+        print('[laplacian/color]')
         output_img = lapl.convolve(cimg)
         output_img.show()
     else:
-        simple_bench('laplacien/color', lambda: lapl.convolve(cimg), args.count)
+        simple_bench('laplacian/color', lambda: lapl.convolve(cimg), args.count)
 
     m = mean(args.vectorize)
     if show:
+        print('[mean/grayscale]')
         output_img = m.convolve(img)
         output_img.show()
     else:
-        simple_bench('mean/color', lambda: m.convolve(img), args.count)
+        simple_bench('mean/grayscale', lambda: m.convolve(img), args.count)
+
+    if show:
+        print('[mean/color]')
+        output_img = m.convolve(cimg)
+        output_img.show()
+    else:
+        simple_bench('mean/color', lambda: m.convolve(cimg), args.count)
 
     # Matrice de convolution pour detection de bord amelioree :
     convol = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]],np.double)
     f = matrix(convol, args.vectorize)
     if show:
+        print('[border/grayscale]')
         output_img = f.convolve(img)
         output_img.show()
     else:
@@ -115,15 +127,18 @@ if __name__ == '__main__':
     convol = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]],np.double)
     f = matrix(convol, args.vectorize)
     if show:
+        print('[sharpen/grayscale]')
         output_img = f.convolve(img_skel)
         output_img.show()
     else:
         simple_bench('sharpen/grayscale', lambda: f.convolve(img_skel), args.count)
+
     # Matrice de convolution pour faire du Gaussian blur avec un stencil de 5x5
     convol = (1./256.)*np.array([[1,4,6,4,1],[4,16,24,16,4],[6,24,36,24,6],[4,16,24,16,4],[1,4,6,4,1]],np.double)
     f = matrix(convol, args.vectorize)
     if show:
-        output_img = f.convolve(cimg)
+        print('[blur/grayscale]')
+        output_img = f.convolve(img_skel)
         output_img.show()
     else:
         simple_bench('blur/grayscale', lambda: f.convolve(img_skel), args.count)
