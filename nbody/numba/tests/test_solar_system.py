@@ -1,15 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import sys
 
 import nbody
 #from nbody.naive import compute_energy
 from nbody.barnes_hut_array import compute_energy
 
-sys.path.append('opengl')
-#sys.path.append('matplotlib')
-from animation import Animation
 
 class SolarSystem:
     def __init__(self, dt = nbody.physics.day_in_sec, display_step = 1):
@@ -24,11 +19,22 @@ class SolarSystem:
     def coords(self):
         return self.particles[:, :2]
 
-sim = SolarSystem( nbody.physics.day_in_sec )
+if __name__ == '__main__':
+    import argparse
 
-bmin = np.min(sim.coords(), axis=0)
-bmax = np.max(sim.coords(), axis=0)
-xmin = -1.25*np.max(np.abs([*bmin, *bmax]))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--render', default='matplotlib', help='Animation renderer')
+    parser.add_argument('--display_step', type=int, default=5, help='Simulation steps between each render')
+    args = parser.parse_args()
 
-anim = Animation( sim, [xmin, -xmin, xmin, -xmin] )
-anim.main_loop()
+    sys.path.append(args.render)
+    from animation import Animation
+
+    sim = SolarSystem( nbody.physics.day_in_sec, display_step = args.display_step )
+
+    bmin = np.min(sim.coords(), axis=0)
+    bmax = np.max(sim.coords(), axis=0)
+    xmin = -1.25*np.max(np.abs([*bmin, *bmax]))
+
+    anim = Animation( sim, [xmin, -xmin, xmin, -xmin])
+    anim.main_loop()
