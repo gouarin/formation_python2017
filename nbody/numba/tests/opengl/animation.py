@@ -17,7 +17,7 @@ class Axis:
         self.scale  = scale
 
 class Animation:
-    """ Simulation renderer.
+    """ Simulation renderer using OpenGL.
 
     Press left button to move.
     Press right button to zoom.
