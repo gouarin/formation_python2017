@@ -1,31 +1,34 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
 
 import nbody
 #from nbody.naive import compute_energy
 from nbody.barnes_hut_array import compute_energy
 
-mass, particles = nbody.init_solar_system()
-energy = np.zeros_like(particles)
+sys.path.append('opengl')
+#sys.path.append('matplotlib')
+from animation import Animation
 
-def animate(i):
-    for t in range(5):
-        time_method.update(mass, particles)
-    scatter.set_offsets(particles[:, :2])
-    return scatter,
+class SolarSystem:
+    def __init__(self, dt = nbody.physics.day_in_sec, display_step = 1):
+        self.mass, self.particles = nbody.init_solar_system()
+        self.time_method = nbody.RK4(dt, self.particles.shape[0], compute_energy)
+        self.display_step = display_step
 
-dt = nbody.physics.day_in_sec
-time_method = nbody.RK4(dt, particles.shape[0], compute_energy)
+    def next(self):
+        for i in range(self.display_step):
+            self.time_method.update(self.mass, self.particles)
 
-fig = plt.figure(figsize=(10,10))
-ax = fig.add_subplot(111)
+    def coords(self):
+        return self.particles[:, :2]
 
-bmin = np.min(particles[: ,:2], axis=0)
-bmax = np.max(particles[: ,:2], axis=0)
+sim = SolarSystem( nbody.physics.day_in_sec )
+
+bmin = np.min(sim.coords(), axis=0)
+bmax = np.max(sim.coords(), axis=0)
 xmin = -1.25*np.max(np.abs([*bmin, *bmax]))
-ax.axis([xmin, -xmin, xmin, -xmin])
-scatter = plt.scatter(particles[:, 0], particles[:, 1])
 
-anim = animation.FuncAnimation(fig, animate, blit=True)
-plt.show()
+anim = Animation( sim, [xmin, -xmin, xmin, -xmin] )
+anim.main_loop()
