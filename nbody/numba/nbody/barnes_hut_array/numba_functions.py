@@ -139,15 +139,17 @@ def computeForce(nbodies, child_array, center_of_mass, mass, cell_radius, p):
             localPos[depth] += 1
             if child >= 0:
                 if child < nbodies:
-                    F = force(pos, center_of_mass[child], mass[child])
-                    acc += F
+                    Fx, Fy = force(pos, center_of_mass[child], mass[child])
+                    acc[0] += Fx
+                    acc[1] += Fy
                 else:
                     dx = center_of_mass[child, 0] - pos[0]
                     dy = center_of_mass[child, 1] - pos[1]
                     dist = np.sqrt(dx**2 + dy**2)
                     if dist != 0 and cell_radius[child - nbodies][0]/dist <.5:
-                        F = force(pos, center_of_mass[child], mass[child])
-                        acc += F
+                        Fx, Fy = force(pos, center_of_mass[child], mass[child])
+                        acc[0] += Fx
+                        acc[1] += Fy
                     else:
                         depth += 1
                         localNode[depth] = nbodies + 4*(child-nbodies)
