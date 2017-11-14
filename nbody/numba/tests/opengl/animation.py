@@ -8,6 +8,7 @@ import OpenGL.arrays.vbo as glvbo
 import sys
 import math
 import numpy as np
+import time
 from copy import deepcopy
 
 
@@ -48,6 +49,10 @@ class Animation:
         self.axis   = Axis( [ axis[0], axis[2] ], max((axis[1]-axis[0])/size[0], (axis[3]-axis[2])/size[1]) )
         self.size   = size
         self.action = None
+
+        # To calculate the fps
+        self.frame_times = [time.time()] * 50
+        self.frame_id    = 0
 
         # Initialize the OpenGL Utility Toolkit
         glutInit(sys.argv)
@@ -153,6 +158,27 @@ class Animation:
         # Update the viewport
         glViewport(0, 0, self.size[0], self.size[1])
 
+    def _print(self, text, pos = None, color = [1., 1., 1., 1.]):
+        """ Print a text. """
+
+        # Default position is the top-left corner
+        if pos is None:
+            pos = [ self.axis.origin[0], self.axis.origin[1] + (self.size[1]-15)*self.axis.scale ]
+
+        glColor4f( *color )
+        glRasterPos2f( *pos )
+
+        for char in text:
+            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ord(char))
+
+    def _fps(self):
+        """ Update frame time and id and return the fps. """
+        curr_time = time.time()
+        duration = curr_time - self.frame_times[self.frame_id]
+        self.frame_times[self.frame_id] = curr_time
+        self.frame_id = (self.frame_id + 1) % len(self.frame_times)
+
+        return len(self.frame_times) / duration
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -169,6 +195,9 @@ class Animation:
 
         # Draw color
         glColor(1., 1., 1.)
+
+        # Printing fps
+        self._print( "{:.1f}fps".format(self._fps()) )
 
         # Bind the VBO
         self.vbo.bind()
