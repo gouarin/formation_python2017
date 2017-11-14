@@ -7,6 +7,7 @@ import OpenGL.arrays.vbo as glvbo
 
 import sys
 import math
+import numpy as np
 from copy import deepcopy
 
 
@@ -43,7 +44,7 @@ class Animation:
             Window title.
         """
 
-        self.simu   = simu   
+        self.simu   = simu
         self.axis   = Axis( [ axis[0], axis[2] ], max((axis[1]-axis[0])/size[0], (axis[3]-axis[2])/size[1]) )
         self.size   = size
         self.action = None
@@ -65,6 +66,7 @@ class Animation:
         glutReshapeFunc(self._resize)       # When the window is resized
         glutMouseFunc(self._mouse)          # When a mouse button is pressed/released
         glutMotionFunc(self._motion)        # When the mouse move with a pressed button
+        glutKeyboardFunc(self._keyboard)    # When a key is pressed
 
         # Background color
         glClearColor(0., 0., 0., 0.)
@@ -83,6 +85,21 @@ class Animation:
         """ Update simulation data and display it. """
         self.simu.next()
         self._update_coords()
+        glutPostRedisplay()
+
+    def reset_view(self):
+        """ Reset view accordingly to the particle coordinates. """
+        border = 0.1
+        coords = self.simu.coords()
+        coord_min = coords.min(axis=0)
+        coord_max = coords.max(axis=0)
+
+        self.axis.scale = (1. + 2*border) * max( (coord_max[0]-coord_min[0])/self.size[0], (coord_max[1]-coord_min[1])/self.size[1] )
+        self.axis.origin = [
+            0.5*(coord_min[0] + coord_max[0] - self.size[0]*self.axis.scale),
+            0.5*(coord_min[1] + coord_max[1] - self.size[1]*self.axis.scale)
+        ]
+
         glutPostRedisplay()
 
     def _update_coords(self):
@@ -122,6 +139,12 @@ class Animation:
 
         glutPostRedisplay()
 
+    def _keyboard(self, key, x, y):
+        """ Called when a key is pressed. """
+        if   key == b'r':
+            self.reset_view()
+        elif key == b'q':
+            glutLeaveMainLoop()
 
     def _resize(self, width, height):
         """ Called when the window is resized. """
