@@ -13,4 +13,4 @@ def force(p1, p2, m2):
     if dist > 0:
         F = (gamma_si * m2) / (dist*dist*dist)
 
-    return np.array([F * dx, F * dy])
+    return F * dx, F * dy
