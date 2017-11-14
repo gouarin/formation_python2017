@@ -153,4 +153,21 @@ def computeForce(nbodies, child_array, center_of_mass, mass, cell_radius, p):
                         localNode[depth] = nbodies + 4*(child-nbodies)
                         localPos[depth] = 0
         depth -= 1
-    return acc    
+    return acc
+
+@numba.njit
+def computeMassDistribution(nbodies, ncell, child, mass, center_of_mass ):
+    for i in range(ncell, -1, -1):
+        this_mass = 0
+        this_center_of_mass = [0, 0]
+        for j in range( nbodies + 4*i, nbodies + 4*i + 4 ):
+            element_id = child[j]
+            if element_id >= 0:
+                this_mass += mass[ element_id ]
+                this_center_of_mass[0] += center_of_mass[element_id][0] * mass[element_id]
+                this_center_of_mass[1] += center_of_mass[element_id][1] * mass[element_id]
+
+        center_of_mass[nbodies + i][0] = this_center_of_mass[0] / this_mass
+        center_of_mass[nbodies + i][1] = this_center_of_mass[1] / this_mass
+        mass[nbodies + i] = this_mass
+
