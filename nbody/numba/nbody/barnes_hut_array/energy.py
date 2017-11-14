@@ -7,9 +7,9 @@ import time
 from . import numba_functions
 import numba
 
-@numba.njit
+@numba.njit(parallel=True)
 def compute_force( nbodies, child, center_of_mass, mass, cell_radius, particles, energy):
-    for i in range(particles.shape[0]):
+    for i in numba.prange(particles.shape[0]):
         acc = numba_functions.computeForce( nbodies, child, center_of_mass, mass, cell_radius, particles[i] )
         energy[i, 2] = acc[0]
         energy[i, 3] = acc[1]
