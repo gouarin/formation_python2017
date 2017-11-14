@@ -24,14 +24,10 @@ class quadArray:
         self.mass[:self.nbodies] = mass
         self.center_of_mass = np.zeros((self.nbodies + self.ncell + 1, 2))
         self.center_of_mass[:self.nbodies] = particles[:, :2]
-        for i in range(self.ncell, -1, -1):
-            elements = self.child[self.nbodies + 4*i:self.nbodies + 4*i + 4]
-            #print('elements', i, elements, self.center_of_mass[elements[elements>=0]]*self.mass[elements[elements>=0]])
-            self.mass[self.nbodies + i] = np.sum(self.mass[elements[elements>=0]])
-            self.center_of_mass[self.nbodies + i] = np.sum(self.center_of_mass[elements[elements>=0]]*self.mass[elements[elements>=0], np.newaxis], axis=0)
-            self.center_of_mass[self.nbodies + i] /= self.mass[self.nbodies + i]
-        # print('mass', self.mass)
-        # print('center_of_mass', self.center_of_mass)
+
+        numba_functions.computeMassDistribution( self.nbodies, self.ncell,
+                self.child, self.mass, self.center_of_mass )
+
 
     def computeForce(self, p):
         return numba_functions.computeForce(self.nbodies, self.child, self.center_of_mass, self.mass, self.cell_radius, p)
@@ -47,3 +43,4 @@ class quadArray:
             s += 2*indent + 'cells: {c}\n'.format(c=cellElements[cellElements>=self.nbodies]-self.nbodies)
             
         return s
+

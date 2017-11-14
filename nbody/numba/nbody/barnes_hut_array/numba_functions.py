@@ -139,18 +139,37 @@ def computeForce(nbodies, child_array, center_of_mass, mass, cell_radius, p):
             localPos[depth] += 1
             if child >= 0:
                 if child < nbodies:
-                    F = force(pos, center_of_mass[child], mass[child])
-                    acc += F
+                    Fx, Fy = force(pos, center_of_mass[child], mass[child])
+                    acc[0] += Fx
+                    acc[1] += Fy
                 else:
                     dx = center_of_mass[child, 0] - pos[0]
                     dy = center_of_mass[child, 1] - pos[1]
                     dist = np.sqrt(dx**2 + dy**2)
                     if dist != 0 and cell_radius[child - nbodies][0]/dist <.5:
-                        F = force(pos, center_of_mass[child], mass[child])
-                        acc += F
+                        Fx, Fy = force(pos, center_of_mass[child], mass[child])
+                        acc[0] += Fx
+                        acc[1] += Fy
                     else:
                         depth += 1
                         localNode[depth] = nbodies + 4*(child-nbodies)
                         localPos[depth] = 0
         depth -= 1
-    return acc    
+    return acc
+
+@numba.njit
+def computeMassDistribution(nbodies, ncell, child, mass, center_of_mass ):
+    for i in range(ncell, -1, -1):
+        this_mass = 0
+        this_center_of_mass = [0, 0]
+        for j in range( nbodies + 4*i, nbodies + 4*i + 4 ):
+            element_id = child[j]
+            if element_id >= 0:
+                this_mass += mass[ element_id ]
+                this_center_of_mass[0] += center_of_mass[element_id][0] * mass[element_id]
+                this_center_of_mass[1] += center_of_mass[element_id][1] * mass[element_id]
+
+        center_of_mass[nbodies + i][0] = this_center_of_mass[0] / this_mass
+        center_of_mass[nbodies + i][1] = this_center_of_mass[1] / this_mass
+        mass[nbodies + i] = this_mass
+
