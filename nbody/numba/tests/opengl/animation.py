@@ -73,9 +73,6 @@ class Animation:
         glutMotionFunc(self._motion)        # When the mouse move with a pressed button
         glutKeyboardFunc(self._keyboard)    # When a key is pressed
 
-        # Background color
-        glClearColor(0., 0., 0., 0.)
-
         # Create a Vertex Buffer Object for the vertices
         coords = simu.coords()
         self.vbo_vertex = glvbo.VBO( coords )
@@ -137,7 +134,10 @@ class Animation:
             self.vbo_color = glvbo.VBO(colors)
 
         self.vbo_color.bind()
-        glColorPointer(3, GL_DOUBLE, 0, None)
+        if colors.shape[1] == 3:
+            glColorPointer(3, GL_DOUBLE, 0, None)
+        else:
+            glColorPointer(4, GL_DOUBLE, 0, None)
 
     def toggle_colors(self):
         """ Toggle color display. """
@@ -244,6 +244,11 @@ class Animation:
     def _draw(self):
         """ Called when the window must be redrawn. """
 
+        # Alpha blending
+        glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         # Clear the buffer
         glClear(GL_COLOR_BUFFER_BIT)
 
@@ -253,6 +258,9 @@ class Animation:
         glOrtho(self.axis.origin[0], self.axis.origin[0] + self.axis.scale * self.size[0],
                 self.axis.origin[1], self.axis.origin[1] + self.axis.scale * self.size[1],
                 -1, 1)
+
+        # Background color
+        glClearColor(0., 0., 0., 0.)
 
         # Draw color
         glColor(1., 1., 1.)
