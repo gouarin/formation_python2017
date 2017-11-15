@@ -30,7 +30,7 @@ class Animation:
         http://carloluchessa.blogspot.fr/2012/09/simple-viewer-in-pyopengl.html
     """
 
-    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True):
+    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True, start_paused = False):
         """ Initialize an animation view.
 
         Parameters:
@@ -47,6 +47,8 @@ class Animation:
             True to colorize the stars using simu.colors method.
         update_colors: bool
             True if the color must be update at each frame (and not only at the initialisation).
+        start_paused: bool
+            True if the simulation is initially paused.
         """
 
         self.simu   = simu
@@ -88,6 +90,9 @@ class Animation:
         # Displaying fps
         self.toggle_fps()
 
+        # Paused ?
+        self.is_paused = start_paused
+
 
     def main_loop(self):
         """ Simulation main loop. """
@@ -95,11 +100,12 @@ class Animation:
 
     def draw_next_frame(self):
         """ Update simulation data and display it. """
-        self.simu.next()
-        self._update_coords()
+        if not self.is_paused:
+            self.simu.next()
+            self._update_coords()
 
-        if self.use_colors and self.update_colors:
-            self._update_colors()
+            if self.use_colors and self.update_colors:
+                self._update_colors()
 
         glutPostRedisplay()
 
@@ -198,6 +204,8 @@ class Animation:
             self.toggle_fps()
         elif key == b'c':
             self.toggle_colors()
+        elif key == b'p':
+            self.is_paused = not self.is_paused
 
     def _resize(self, width, height):
         """ Called when the window is resized. """
