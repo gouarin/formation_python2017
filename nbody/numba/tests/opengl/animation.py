@@ -30,7 +30,7 @@ class Animation:
         http://carloluchessa.blogspot.fr/2012/09/simple-viewer-in-pyopengl.html
     """
 
-    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation"):
+    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True):
         """ Initialize an animation view.
 
         Parameters:
@@ -43,16 +43,16 @@ class Animation:
             Initial window size [width, height].
         title: string
             Window title.
+        use_colors: bool
+            True to colorize the stars using simu.colors method.
+        update_colors: bool
+            True if the color must be update at each frame (and not only at the initialisation).
         """
 
         self.simu   = simu
         self.axis   = Axis( [ axis[0], axis[2] ], max((axis[1]-axis[0])/size[0], (axis[3]-axis[2])/size[1]) )
         self.size   = size
         self.action = None
-
-        # To calculate the fps
-        self.frame_times = [time.time()] * 50
-        self.frame_id    = 0
 
         # Initialize the OpenGL Utility Toolkit
         glutInit(sys.argv)
@@ -76,10 +76,20 @@ class Animation:
         # Background color
         glClearColor(0., 0., 0., 0.)
 
-        # Create a Vertex Buffer Object
+        # Create a Vertex Buffer Object for the vertices
         coords = simu.coords()
-        self.vbo   = glvbo.VBO( coords )
+        self.vbo_vertex = glvbo.VBO( coords )
         self.count = coords.shape[0]
+
+        # Displaying colors
+        self.update_colors = update_colors
+        if use_colors:
+            self.toggle_colors()
+        else:
+            self.use_colors = False
+
+        # Displaying fps
+        self.toggle_fps()
 
 
     def main_loop(self):
@@ -90,6 +100,10 @@ class Animation:
         """ Update simulation data and display it. """
         self.simu.next()
         self._update_coords()
+
+        if self.use_colors and self.update_colors:
+            self._update_colors()
+
         glutPostRedisplay()
 
     def reset_view(self):
@@ -110,8 +124,38 @@ class Animation:
     def _update_coords(self):
         """ Update vertex coordinates. """
         coords = self.simu.coords()
-        self.vbo.set_array(coords)
+        self.vbo_vertex.set_array(coords)
         self.count = coords.shape[0]
+
+    def _update_colors(self):
+        """ Update or create Vertex Buffer Object of colors. """
+        colors = self.simu.colors()
+
+        try:
+            self.vbo_color.set_array(colors)
+        except AttributeError:
+            self.vbo_color = glvbo.VBO(colors)
+
+        self.vbo_color.bind()
+        glColorPointer(3, GL_DOUBLE, 0, None)
+
+    def toggle_colors(self):
+        """ Toggle color display. """
+        try:
+            self.use_colors = not self.use_colors
+        except AttributeError:
+            self.use_colors = True
+
+        if self.use_colors:
+            try:
+                self._update_colors()
+                glEnableClientState(GL_COLOR_ARRAY)
+            except AttributeError:
+                self.use_colors = False
+
+        if not self.use_colors:
+            glDisableClientState(GL_COLOR_ARRAY)
+
 
     def _mouse(self, button, state, x, y):
         """ Called when a mouse button has been pressed/released. """
@@ -150,6 +194,10 @@ class Animation:
             self.reset_view()
         elif key == b'q':
             glutLeaveMainLoop()
+        elif key == b'f':
+            self.toggle_fps()
+        elif key == b'c':
+            self.toggle_colors()
 
     def _resize(self, width, height):
         """ Called when the window is resized. """
@@ -180,6 +228,19 @@ class Animation:
 
         return len(self.frame_times) / duration
 
+    def toggle_fps(self):
+        """ Toggle the display of the fps. """
+        try:
+            self.use_fps = not self.use_fps
+        except AttributeError:
+            self.use_fps = True
+
+        if self.use_fps:
+            # To calculate the fps
+            self.frame_times = [time.time()] * 50
+            self.frame_id    = 0
+
+
     def _draw(self):
         """ Called when the window must be redrawn. """
 
@@ -197,16 +258,17 @@ class Animation:
         glColor(1., 1., 1.)
 
         # Printing fps
-        self._print( "{:.1f}fps".format(self._fps()) )
+        if self.use_fps:
+            self._print( "{:.1f}fps".format(self._fps()) )
 
-        # Bind the VBO
-        self.vbo.bind()
+        # Bind the vertex VBO
+        self.vbo_vertex.bind()
 
         # Tell OpenGL that the VBO contains an array of vertices
         glEnableClientState(GL_VERTEX_ARRAY)
 
         # These vertices contain 2 double precision coordinates
-        glVertexPointer(2, GL_DOUBLE, 0, self.vbo)
+        glVertexPointer(2, GL_DOUBLE, 0, None)
 
         # Draw "count" points from the VBO
         glDrawArrays(GL_POINTS, 0, self.count)
