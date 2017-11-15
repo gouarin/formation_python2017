@@ -154,7 +154,8 @@ class Animation:
 
         if self.use_colors:
             try:
-                self._update_colors()
+                if self.update_colors or not hasattr(self, 'vbo_color'):
+                    self._update_colors()
                 glEnableClientState(GL_COLOR_ARRAY)
             except AttributeError:
                 self.use_colors = False
