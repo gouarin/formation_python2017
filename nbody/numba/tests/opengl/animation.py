@@ -196,9 +196,8 @@ class Animation:
                 void main()
                 {
                     gl_Position = ftransform();
-                    vec4 color = gl_Color;
-                    color[3] = min(1., color[3]*scale);
-                    gl_FrontColor = color;
+                    gl_FrontColor = gl_Color;
+                    gl_FrontColor[3] = min(1., gl_FrontColor[3]*scale);
                 }
                 """, GL_VERTEX_SHADER)
 
