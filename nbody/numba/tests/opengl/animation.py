@@ -366,7 +366,9 @@ class Animation:
     def _print_help(self):
         """ Print help. """
         self._print(pos = [0, 1], text =
-"""r: reset view
+"""left click: translate view
+right click: zoom in/out
+r: reset view
 q: quit
 f: toggle fps display
 c: toggle colors display
