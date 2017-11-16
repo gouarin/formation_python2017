@@ -4,6 +4,7 @@
 from OpenGL.GL   import *
 from OpenGL.GLUT import *
 import OpenGL.arrays.vbo as glvbo
+from OpenGL.GL import shaders
 
 import sys
 import math
@@ -30,7 +31,7 @@ class Animation:
         http://carloluchessa.blogspot.fr/2012/09/simple-viewer-in-pyopengl.html
     """
 
-    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True, start_paused = False):
+    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True, use_adaptative_opacity = False, start_paused = False):
         """ Initialize an animation view.
 
         Parameters:
@@ -47,6 +48,8 @@ class Animation:
             True to colorize the stars using simu.colors method.
         update_colors: bool
             True if the color must be update at each frame (and not only at the initialisation).
+        use_adaptative_opacity: bool
+            True if the opacity is adapted to the view zoom.
         start_paused: bool
             True if the simulation is initially paused.
         """
@@ -83,6 +86,7 @@ class Animation:
         # Display options
         self.use_colors_update = update_colors
         self.use_colors = use_colors
+        self.adaptative_opacity_factor = self.axis.scale
         self.use_fps = True
         self.is_paused = start_paused
 
@@ -168,6 +172,63 @@ class Animation:
     @use_help.setter
     def use_help(self, value):
         self._use_help = value
+
+
+    @property
+    def use_adaptative_opacity(self):
+        """ Control the adaptive opacity.
+
+        Opacity varies linearly with the zoom factor.
+        """
+        try:
+            return self._use_adaptative_opacity
+        except AttributeError:
+            return False
+
+    @use_adaptative_opacity.setter
+    def use_adaptative_opacity(self, value):
+        self._use_adaptative_opacity = value
+
+        if value and not hasattr(self, '_ao_shader_program'):
+            # Try except ?
+            vertex_shader = shaders.compileShader("""
+                uniform float scale;
+                void main()
+                {
+                    gl_Position = ftransform();
+                    vec4 color = gl_Color;
+                    color[3] = min(1., color[3]*scale);
+                    gl_FrontColor = color;
+                }
+                """, GL_VERTEX_SHADER)
+
+            fragment_shader = shaders.compileShader("""
+                void main()
+                {
+                    gl_FragColor = gl_Color;
+                }
+                """, GL_FRAGMENT_SHADER)
+
+            self._ao_shader_program = shaders.compileProgram(vertex_shader, fragment_shader)
+
+
+    @property
+    def adaptative_opacity_factor(self):
+        """ Control the adaptative opacity amplitude.
+
+        For a given view/zoom, setting this factor to
+        the ratio between the axis width/height and
+        the screen width/height (i.e. the zoom factor)
+        doesn't change the display.
+        """
+        try:
+            return self._ao_factor
+        except AttributeError:
+            return self.axis.scale
+
+    @adaptative_opacity_factor.setter
+    def adaptative_opacity_factor(self, value):
+        self._ao_factor = value
 
 
     ###########################################################################
@@ -271,6 +332,8 @@ class Animation:
             self.use_colors = not self.use_colors
         elif key == b'u':
             self.use_colors_update = not self.use_colors_update
+        elif key == b'o':
+            self.use_adaptative_opacity = not self.use_adaptative_opacity
         elif key == b'p' or key == b' ':
             self.is_paused = not self.is_paused
         elif key == b'h':
@@ -308,6 +371,7 @@ q: quit
 f: toggle fps display
 c: toggle colors display
 u: toggle colors update
+o: toggle adaptative opacity
 p: pause (or <space>)
 h: toggle help display""" )
 
@@ -323,6 +387,13 @@ h: toggle help display""" )
     def _print_fps(self):
         """ Calculate and print fps. """
         self._print( "{:.1f}fps".format(self._fps()) )
+
+    def _activate_adaptative_opacity(self):
+        """ Activate the adaptative opacity shader program. """
+
+        glUseProgram(self._ao_shader_program)
+        glUniform1f(glGetUniformLocation(self._ao_shader_program, 'scale'),
+                     np.float32(max(0.01, self._ao_factor/self.axis.scale)))
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -341,6 +412,12 @@ h: toggle help display""" )
         glOrtho(self.axis.origin[0], self.axis.origin[0] + self.axis.scale * self.size[0],
                 self.axis.origin[1], self.axis.origin[1] + self.axis.scale * self.size[1],
                 -1, 1)
+
+        # Adaptative opacity
+        if self.use_adaptative_opacity:
+            self._activate_adaptative_opacity()
+        else:
+            glUseProgram(0)
 
         # Background color
         glClearColor(0., 0., 0., 0.)
@@ -367,7 +444,6 @@ h: toggle help display""" )
         # Printing help
         if self.use_help:
             self._print_help()
-
 
         # Swap display buffers
         glutSwapBuffers()

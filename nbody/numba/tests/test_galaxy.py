@@ -34,8 +34,8 @@ class Galaxy:
     def colors(self):
         speed_magnitude = np.linalg.norm(self.particles[:, 2:4], axis=1)
         colors = temp2color( 3000 + 6000*speed_magnitude/speed_magnitude.max() )
-        colors[:,3] = 0.2
-        return colors + np.asarray([0., 0., 0., 0.8]) * np.minimum(self.mass, 20).reshape(-1, 1) / 20
+        colors[:,3] = 0.05
+        return colors + np.asarray([0., 0., 0., 0.95]) * np.minimum(self.mass, 20).reshape(-1, 1) / 20
 
 
 if __name__ == '__main__':
@@ -57,11 +57,12 @@ if __name__ == '__main__':
                 ]
     sim = Galaxy(blackHole, display_step = args.display_step)
 
-    print( temp2color( np.asarray([3000]) ) )
+    anim = Animation( sim, axis=[-10, 10, -10, 10] )
 
     if args.render == 'opengl':
-        anim = Animation( sim, axis=[-10, 10, -10, 10], use_colors=True, update_colors=False )
-    else:
-        anim = Animation( sim, axis=[-10, 10, -10, 10] )
+        anim.use_colors = True
+        anim.update_colors = False
+        anim.use_adaptative_opacity = True
+
     anim.main_loop()
 
