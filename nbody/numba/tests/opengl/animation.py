@@ -274,10 +274,14 @@ class Animation:
             pos = [ self.axis.origin[0], self.axis.origin[1] + (self.size[1]-15)*self.axis.scale ]
 
         glColor4f( *color )
-        glRasterPos2f( *pos )
+        glRasterPos2f(*pos)
 
         for char in text:
-            glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ord(char))
+            if char == "\n":
+                pos[1] -= 15*self.axis.scale
+                glRasterPos2f(*pos)
+            else:
+                glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ord(char))
 
     def _fps(self):
         """ Update frame time and id and return the fps. """
