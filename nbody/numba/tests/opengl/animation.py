@@ -86,6 +86,7 @@ class Animation:
         self.use_fps = True
         self.is_paused = start_paused
 
+
     ###########################################################################
     # Properties
 
@@ -154,6 +155,20 @@ class Animation:
     @is_paused.setter
     def is_paused(self, value):
         self._is_paused = value
+
+
+    @property
+    def use_help(self):
+        """ Control help display. """
+        try:
+            return self._use_help
+        except AttributeError:
+            return False
+
+    @use_help.setter
+    def use_help(self, value):
+        self._use_help = value
+
 
     ###########################################################################
     # Public methods
@@ -258,6 +273,8 @@ class Animation:
             self.use_colors_update = not self.use_colors_update
         elif key == b'p' or key == b' ':
             self.is_paused = not self.is_paused
+        elif key == b'h':
+            self.use_help = not self.use_help
 
     def _resize(self, width, height):
         """ Called when the window is resized. """
@@ -266,14 +283,14 @@ class Animation:
         # Update the viewport
         glViewport(0, 0, self.size[0], self.size[1])
 
-    def _print(self, text, pos = None, color = [1., 1., 1., 1.]):
+    def _print(self, text, pos = [0, 0], color = [1., 1., 1., 1.]):
         """ Print a text. """
 
         # Default position is the top-left corner
-        if pos is None:
-            pos = [ self.axis.origin[0], self.axis.origin[1] + (self.size[1]-15)*self.axis.scale ]
+        pos = [ self.axis.origin[0] + 9*pos[0]*self.axis.scale,
+                self.axis.origin[1] + (self.size[1] - 15*(pos[1]+1))*self.axis.scale ]
 
-        glColor4f( *color )
+        glColor4f(*color)
         glRasterPos2f(*pos)
 
         for char in text:
@@ -282,6 +299,17 @@ class Animation:
                 glRasterPos2f(*pos)
             else:
                 glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ord(char))
+
+    def _print_help(self):
+        """ Print help. """
+        self._print(pos = [0, 1], text =
+"""r: reset view
+q: quit
+f: toggle fps display
+c: toggle colors display
+u: toggle colors update
+p: pause (or <space>)
+h: toggle help display""" )
 
     def _fps(self):
         """ Update frame time and id and return the fps. """
@@ -292,7 +320,9 @@ class Animation:
 
         return len(self.frame_times) / duration
 
-
+    def _print_fps(self):
+        """ Calculate and print fps. """
+        self._print( "{:.1f}fps".format(self._fps()) )
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -318,10 +348,6 @@ class Animation:
         # Draw color
         glColor(1., 1., 1.)
 
-        # Printing fps
-        if self.use_fps:
-            self._print( "{:.1f}fps".format(self._fps()) )
-
         # Bind the vertex VBO
         self.vbo_vertex.bind()
 
@@ -333,6 +359,15 @@ class Animation:
 
         # Draw "count" points from the VBO
         glDrawArrays(GL_POINTS, 0, self.count)
+
+        # Printing fps
+        if self.use_fps:
+            self._print_fps()
+
+        # Printing help
+        if self.use_help:
+            self._print_help()
+
 
         # Swap display buffers
         glutSwapBuffers()
