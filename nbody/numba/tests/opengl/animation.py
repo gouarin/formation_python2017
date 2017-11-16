@@ -80,19 +80,83 @@ class Animation:
         self.vbo_vertex = glvbo.VBO( coords )
         self.count = coords.shape[0]
 
-        # Displaying colors
-        self.update_colors = update_colors
-        if use_colors:
-            self.toggle_colors()
-        else:
-            self.use_colors = False
-
-        # Displaying fps
-        self.toggle_fps()
-
-        # Paused ?
+        # Display options
+        self.use_colors_update = update_colors
+        self.use_colors = use_colors
+        self.use_fps = True
         self.is_paused = start_paused
 
+    ###########################################################################
+    # Properties
+
+    @property
+    def use_colors(self):
+        """ Control color display. """
+        try:
+            return self._use_colors
+        except AttributeError:
+            return False
+
+    @use_colors.setter
+    def use_colors(self, value):
+        self._use_colors = value
+
+        if self._use_colors:
+            try:
+                if self.use_colors_update or not hasattr(self, 'vbo_color'):
+                    self._update_colors()
+                glEnableClientState(GL_COLOR_ARRAY)
+            except AttributeError:
+                self._use_colors = False
+
+        if not self._use_colors:
+            glDisableClientState(GL_COLOR_ARRAY)
+
+    @property
+    def use_colors_update(self):
+        """ Control color update for each frame. """
+        try:
+            return self._use_colors_update
+        except AttributeError:
+            return False
+
+    @use_colors_update.setter
+    def use_colors_update(self, value):
+        self._use_colors_update = value
+
+
+    @property
+    def use_fps(self):
+        """ Control the display of the fps. """
+        try:
+            return self._use_fps
+        except AttributeError:
+            return False
+
+    @use_fps.setter
+    def use_fps(self, value):
+        self._use_fps = value
+
+        if self._use_fps:
+            # To calculate the fps
+            self.frame_times = [time.time()] * 50
+            self.frame_id    = 0
+
+
+    @property
+    def is_paused(self):
+        """ Control the execution of the simulation. """
+        try:
+            return self._is_paused
+        except AttributeError:
+            return False
+
+    @is_paused.setter
+    def is_paused(self, value):
+        self._is_paused = value
+
+    ###########################################################################
+    # Public methods
 
     def main_loop(self):
         """ Simulation main loop. """
@@ -104,7 +168,7 @@ class Animation:
             self.simu.next()
             self._update_coords()
 
-            if self.use_colors and self.update_colors:
+            if self.use_colors and self.use_colors_update:
                 self._update_colors()
 
         glutPostRedisplay()
@@ -123,6 +187,10 @@ class Animation:
         ]
 
         glutPostRedisplay()
+
+
+    ###########################################################################
+    # Internal methods
 
     def _update_coords(self):
         """ Update vertex coordinates. """
@@ -144,25 +212,6 @@ class Animation:
             glColorPointer(3, GL_DOUBLE, 0, None)
         else:
             glColorPointer(4, GL_DOUBLE, 0, None)
-
-    def toggle_colors(self):
-        """ Toggle color display. """
-        try:
-            self.use_colors = not self.use_colors
-        except AttributeError:
-            self.use_colors = True
-
-        if self.use_colors:
-            try:
-                if self.update_colors or not hasattr(self, 'vbo_color'):
-                    self._update_colors()
-                glEnableClientState(GL_COLOR_ARRAY)
-            except AttributeError:
-                self.use_colors = False
-
-        if not self.use_colors:
-            glDisableClientState(GL_COLOR_ARRAY)
-
 
     def _mouse(self, button, state, x, y):
         """ Called when a mouse button has been pressed/released. """
@@ -202,10 +251,12 @@ class Animation:
         elif key == b'q':
             glutLeaveMainLoop()
         elif key == b'f':
-            self.toggle_fps()
+            self.use_fps = not self.use_fps
         elif key == b'c':
-            self.toggle_colors()
-        elif key == b'p':
+            self.use_colors = not self.use_colors
+        elif key == b'u':
+            self.use_colors_update = not self.use_colors_update
+        elif key == b'p' or key == b' ':
             self.is_paused = not self.is_paused
 
     def _resize(self, width, height):
@@ -237,17 +288,6 @@ class Animation:
 
         return len(self.frame_times) / duration
 
-    def toggle_fps(self):
-        """ Toggle the display of the fps. """
-        try:
-            self.use_fps = not self.use_fps
-        except AttributeError:
-            self.use_fps = True
-
-        if self.use_fps:
-            # To calculate the fps
-            self.frame_times = [time.time()] * 50
-            self.frame_id    = 0
 
 
     def _draw(self):
