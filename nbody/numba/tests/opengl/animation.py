@@ -54,7 +54,7 @@ class Animation:
         self.simu   = simu
         self.axis   = Axis( [ axis[0], axis[2] ], max((axis[1]-axis[0])/size[0], (axis[3]-axis[2])/size[1]) )
         self.size   = size
-        self.action = None
+        self.mouse_action = None
 
         # Initialize the OpenGL Utility Toolkit
         glutInit(sys.argv)
@@ -166,28 +166,28 @@ class Animation:
 
     def _mouse(self, button, state, x, y):
         """ Called when a mouse button has been pressed/released. """
-        if self.action is None and state == GLUT_DOWN:
+        if self.mouse_action is None and state == GLUT_DOWN:
             self.button = button
             self.old_axis = deepcopy(self.axis)
             self.x_start = x
             self.y_start = y
 
             if button == GLUT_LEFT_BUTTON:
-                self.action = 'move'
+                self.mouse_action = 'move'
             elif button == GLUT_RIGHT_BUTTON:
-                self.action = 'zoom'
+                self.mouse_action = 'zoom'
 
-        elif self.action is not None and state == GLUT_UP and button == self.button:
-            self.action = None
+        elif self.mouse_action is not None and state == GLUT_UP and button == self.button:
+            self.mouse_action = None
 
 
     def _motion(self, x, y):
         """ Called when the mouse has move while a button is pressed. """
-        if self.action == 'move':
+        if self.mouse_action == 'move':
             self.axis.origin[0] = self.old_axis.origin[0] - self.old_axis.scale * (x - self.x_start)
             self.axis.origin[1] = self.old_axis.origin[1] + self.old_axis.scale * (y - self.y_start)
 
-        elif self.action == 'zoom':
+        elif self.mouse_action == 'zoom':
             zoom_factor = math.exp( 0.01 * (self.y_start - y) )
             self.axis.origin[0] = self.old_axis.origin[0] + (1 - zoom_factor) * self.old_axis.scale * self.x_start
             self.axis.origin[1] = self.old_axis.origin[1] + (1 - zoom_factor) * self.old_axis.scale * (self.size[1]-self.y_start)
