@@ -34,7 +34,7 @@ class Animation:
 
     def __init__(self, simu,
                  axis=[0, 1, 0, 1], size=[640, 480], title="Animation",
-                 use_colors=False, update_colors=True,
+                 use_colors=False, update_colors=False,
                  use_adaptative_opacity=False, start_paused=False):
         """ Initialize an animation view.
 
@@ -458,8 +458,10 @@ if __name__ == '__main__':
 
     class SpinningCloud:
         def __init__(self, size, theta=math.pi/18000):
-            self._coords = np.array(np.random.randn(size, 2), dtype=np.float64)
-            self._rot = np.asarray([[math.cos(theta), math.sin(theta)], [-math.sin(theta), math.cos(theta)]])
+            self._coords = np.random.randn(size, 2)
+            self._colors = np.random.rand(size, 4)
+            self._rot = np.asarray([[math.cos(theta), math.sin(theta)],
+                                    [-math.sin(theta), math.cos(theta)]])
 
         def next(self):
             self._coords = np.dot(self._coords, self._rot)
@@ -467,7 +469,15 @@ if __name__ == '__main__':
         def coords(self):
             return self._coords
 
+        def colors(self):
+            return self._colors
+
     simu = SpinningCloud(100000, math.pi/1800)
 
-    anim = Animation(simu, axis=[-1, 1, -1, 1])
+    anim = Animation(simu, axis=[-2, 2, -2, 2], size=[480, 480])
+    anim.use_colors = True
+    anim.use_colors_update = False
+    anim.use_adaptative_opacity = True
+    anim.use_help = True
+
     anim.main_loop()
