@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     if args.render == 'opengl':
         anim.use_colors = True
-        anim.update_colors = False
+        anim.use_colors_update = False
         anim.use_adaptative_opacity = True
 
     anim.main_loop()
