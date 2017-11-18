@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# coding: utf-8
 
-from OpenGL.GL   import *
+from OpenGL.GL import *
 from OpenGL.GLUT import *
 import OpenGL.arrays.vbo as glvbo
 from OpenGL.GL import shaders
@@ -17,7 +17,8 @@ class Axis:
     """ View axis. """
     def __init__(self, origin, scale):
         self.origin = origin
-        self.scale  = scale
+        self.scale = scale
+
 
 class Animation:
     """ Simulation renderer using OpenGL.
@@ -43,7 +44,10 @@ class Animation:
         http://carloluchessa.blogspot.fr/2012/09/simple-viewer-in-pyopengl.html
     """
 
-    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title=b"Animation", use_colors = False, update_colors = True, use_adaptative_opacity = False, start_paused = False):
+    def __init__(self, simu,
+                 axis=[0, 1, 0, 1], size=[640, 480], title=b"Animation",
+                 use_colors=False, update_colors=False,
+                 use_adaptative_opacity=False, start_paused=False):
         """ Initialize an animation view.
 
         Parameters:
@@ -59,16 +63,18 @@ class Animation:
         use_colors: bool
             True to colorize the stars using simu.colors method.
         update_colors: bool
-            True if the color must be update at each frame (and not only at the initialisation).
+            True if the color must be update at each frame (and not only at
+                the initialisation).
         use_adaptative_opacity: bool
             True if the opacity is adapted to the view zoom.
         start_paused: bool
             True if the simulation is initially paused.
         """
 
-        self.simu   = simu
-        self.axis   = Axis( [ axis[0], axis[2] ], max((axis[1]-axis[0])/size[0], (axis[3]-axis[2])/size[1]) )
-        self.size   = size
+        self.simu = simu
+        self.axis = Axis([axis[0], axis[2]], max((axis[1]-axis[0])/size[0],
+                                                 (axis[3]-axis[2])/size[1]))
+        self.size = size
         self.mouse_action = None
 
         # Initialize the OpenGL Utility Toolkit
@@ -87,12 +93,12 @@ class Animation:
         glutIdleFunc(self.draw_next_frame)  # When OpenGL gets bored
         glutReshapeFunc(self._resize)       # When the window is resized
         glutMouseFunc(self._mouse)          # When a mouse button is pressed/released
-        glutMotionFunc(self._motion)        # When the mouse move with a pressed button
+        glutMotionFunc(self._motion)        # When the mouse moves with a pressed button
         glutKeyboardFunc(self._keyboard)    # When a key is pressed
 
         # Create a Vertex Buffer Object for the vertices
         coords = simu.coords()
-        self.vbo_vertex = glvbo.VBO( coords )
+        self.vbo_vertex = glvbo.VBO(coords)
         self.count = coords.shape[0]
 
         # Display options
@@ -101,7 +107,6 @@ class Animation:
         self.adaptative_opacity_factor = self.axis.scale
         self.use_fps = True
         self.is_paused = start_paused
-
 
     ###########################################################################
     # Properties
@@ -141,7 +146,6 @@ class Animation:
     def use_colors_update(self, value):
         self._use_colors_update = value
 
-
     @property
     def use_fps(self):
         """ Control the display of the fps. """
@@ -157,8 +161,7 @@ class Animation:
         if self._use_fps:
             # To calculate the fps
             self.frame_times = [time.time()] * 50
-            self.frame_id    = 0
-
+            self.frame_id = 0
 
     @property
     def is_paused(self):
@@ -172,7 +175,6 @@ class Animation:
     def is_paused(self, value):
         self._is_paused = value
 
-
     @property
     def use_help(self):
         """ Control help display. """
@@ -184,7 +186,6 @@ class Animation:
     @use_help.setter
     def use_help(self, value):
         self._use_help = value
-
 
     @property
     def use_adaptative_opacity(self):
@@ -220,8 +221,8 @@ class Animation:
                 }
                 """, GL_FRAGMENT_SHADER)
 
-            self._ao_shader_program = shaders.compileProgram(vertex_shader, fragment_shader)
-
+            self._ao_shader_program = shaders.compileProgram(vertex_shader,
+                                                             fragment_shader)
 
     @property
     def adaptative_opacity_factor(self):
@@ -240,7 +241,6 @@ class Animation:
     @adaptative_opacity_factor.setter
     def adaptative_opacity_factor(self, value):
         self._ao_factor = value
-
 
     ###########################################################################
     # Public methods
@@ -267,14 +267,16 @@ class Animation:
         coord_min = coords.min(axis=0)
         coord_max = coords.max(axis=0)
 
-        self.axis.scale = (1. + 2*border) * max( (coord_max[0]-coord_min[0])/self.size[0], (coord_max[1]-coord_min[1])/self.size[1] )
+        self.axis.scale = (1. + 2*border) * max(
+            (coord_max[0]-coord_min[0])/self.size[0],
+            (coord_max[1]-coord_min[1])/self.size[1]
+        )
         self.axis.origin = [
             0.5*(coord_min[0] + coord_max[0] - self.size[0]*self.axis.scale),
             0.5*(coord_min[1] + coord_max[1] - self.size[1]*self.axis.scale)
         ]
 
         glutPostRedisplay()
-
 
     ###########################################################################
     # Internal methods
@@ -316,7 +318,6 @@ class Animation:
         elif self.mouse_action is not None and state == GLUT_UP and button == self.button:
             self.mouse_action = None
 
-
     def _motion(self, x, y):
         """ Called when the mouse has move while a button is pressed. """
         if self.mouse_action == 'move':
@@ -324,7 +325,7 @@ class Animation:
             self.axis.origin[1] = self.old_axis.origin[1] + self.old_axis.scale * (y - self.y_start)
 
         elif self.mouse_action == 'zoom':
-            zoom_factor = math.exp( 0.01 * (self.y_start - y) )
+            zoom_factor = math.exp(0.01 * (self.y_start - y))
             self.axis.origin[0] = self.old_axis.origin[0] + (1 - zoom_factor) * self.old_axis.scale * self.x_start
             self.axis.origin[1] = self.old_axis.origin[1] + (1 - zoom_factor) * self.old_axis.scale * (self.size[1]-self.y_start)
             self.axis.scale = zoom_factor * self.old_axis.scale
@@ -333,7 +334,7 @@ class Animation:
 
     def _keyboard(self, key, x, y):
         """ Called when a key is pressed. """
-        if   key == b'r':
+        if key == b'r':
             self.reset_view()
         elif key == b'q':
             glutLeaveMainLoop()
@@ -352,17 +353,17 @@ class Animation:
 
     def _resize(self, width, height):
         """ Called when the window is resized. """
-        self.size  = [ max(width, 1), max(height, 1) ]
+        self.size = [max(width, 1), max(height, 1)]
 
         # Update the viewport
         glViewport(0, 0, self.size[0], self.size[1])
 
-    def _print(self, text, pos = [0, 0], color = [1., 1., 1., 1.]):
+    def _print(self, text, pos=[0, 0], color=[1., 1., 1., 1.]):
         """ Print a text. """
 
         # Default position is the top-left corner
-        pos = [ self.axis.origin[0] + 9*pos[0]*self.axis.scale,
-                self.axis.origin[1] + (self.size[1] - 15*(pos[1]+1))*self.axis.scale ]
+        pos = [self.axis.origin[0] + 9*pos[0]*self.axis.scale,
+               self.axis.origin[1] + (self.size[1] - 15*(pos[1]+1))*self.axis.scale]
 
         glColor4f(*color)
         glRasterPos2f(*pos)
@@ -376,8 +377,7 @@ class Animation:
 
     def _print_help(self):
         """ Print help. """
-        self._print(pos = [0, 1], text =
-"""left click: translate view
+        self._print(pos=[0, 1], text="""left click: translate view
 right click: zoom in/out
 r: reset view
 q: quit
@@ -386,7 +386,7 @@ c: toggle colors display
 u: toggle colors update
 o: toggle adaptative opacity
 p: pause (or <space>)
-h: toggle help display""" )
+h: toggle help display""")
 
     def _fps(self):
         """ Update frame time and id and return the fps. """
@@ -399,14 +399,14 @@ h: toggle help display""" )
 
     def _print_fps(self):
         """ Calculate and print fps. """
-        self._print( "{:.1f}fps".format(self._fps()) )
+        self._print("{:.1f}fps".format(self._fps()))
 
     def _activate_adaptative_opacity(self):
         """ Activate the adaptative opacity shader program. """
 
         glUseProgram(self._ao_shader_program)
         glUniform1f(glGetUniformLocation(self._ao_shader_program, 'scale'),
-                     np.float32(max(0.01, self._ao_factor/self.axis.scale)))
+                    np.float32(max(0.01, self._ao_factor/self.axis.scale)))
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -462,24 +462,34 @@ h: toggle help display""" )
         glutSwapBuffers()
 
 
-
+###############################################################################
+# Demo
 if __name__ == '__main__':
     """ Demo """
     import numpy as np
 
     class SpinningCloud:
-        def __init__(self, size, theta = math.pi/18000):
-            self._coords = np.array(np.random.randn(size, 2), dtype = np.float64)
-            self._rot    = np.asarray([[ math.cos(theta), math.sin(theta) ],[-math.sin(theta), math.cos(theta) ]])
+        def __init__(self, size, theta=math.pi/18000):
+            self._coords = np.random.randn(size, 2)
+            self._colors = np.random.rand(size, 4)
+            self._rot = np.asarray([[math.cos(theta), math.sin(theta)],
+                                    [-math.sin(theta), math.cos(theta)]])
 
         def next(self):
-            self._coords = np.dot( self._coords, self._rot )
+            self._coords = np.dot(self._coords, self._rot)
 
         def coords(self):
             return self._coords
 
+        def colors(self):
+            return self._colors
+
     simu = SpinningCloud(100000, math.pi/1800)
 
-    anim = Animation( simu, axis=[-1, 1, -1, 1] )
-    anim.main_loop()
+    anim = Animation(simu, axis=[-2, 2, -2, 2], size=[480, 480])
+    anim.use_colors = True
+    anim.use_colors_update = False
+    anim.use_adaptative_opacity = True
+    anim.use_help = True
 
+    anim.main_loop()
