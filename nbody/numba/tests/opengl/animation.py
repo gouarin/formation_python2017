@@ -24,6 +24,18 @@ class Animation:
 
     Press left button to move.
     Press right button to zoom.
+    Other shortcuts to control display: 'h' to se the help.
+
+
+    Under *Windows*, in order to have a working GLUT install,
+    follow these instructions:
+        https://codeyarns.com/2012/04/27/pyopengl-installation-notes-for-windows/
+        https://deparkes.co.uk/2015/02/04/anaconda-whl-install/
+    1) uninstall pyopengl and pyopengl-accelerate Python modules,
+    2) download appropriate files (windows and python versions) from
+        https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl,
+    3) install it using 'pip install <file>' (even if you use Anaconda).
+
 
     Freely inspired from:
         http://cyrille.rossant.net/2d-graphics-rendering-tutorial-with-pyopengl/
@@ -31,7 +43,7 @@ class Animation:
         http://carloluchessa.blogspot.fr/2012/09/simple-viewer-in-pyopengl.html
     """
 
-    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title="Animation", use_colors = False, update_colors = True, use_adaptative_opacity = False, start_paused = False):
+    def __init__(self, simu, axis=[0, 1, 0, 1], size=[640, 480], title=b"Animation", use_colors = False, update_colors = True, use_adaptative_opacity = False, start_paused = False):
         """ Initialize an animation view.
 
         Parameters:
