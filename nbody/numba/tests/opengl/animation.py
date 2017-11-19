@@ -242,6 +242,18 @@ class Animation:
     def adaptative_opacity_factor(self, value):
         self._ao_factor = value
 
+    @property
+    def tracked_star(self):
+        """ Id of the tracked star. None if disabled. """
+        try:
+            return self._tracked_star
+        except AttributeError:
+            return None
+
+    @tracked_star.setter
+    def tracked_star(self, value):
+        self._tracked_star = value
+
     ###########################################################################
     # Public methods
 
@@ -261,22 +273,27 @@ class Animation:
         glutPostRedisplay()
 
     def reset_view(self):
-        """ Reset view accordingly to the particle coordinates. """
+        """ Reset view accordingly to the particle coordinates and the tracked star. """
         border = 0.1
         coords = self.simu.coords()
         coord_min = coords.min(axis=0)
         coord_max = coords.max(axis=0)
 
-        self.axis.scale = (1. + 2*border) * max(
-            (coord_max[0]-coord_min[0])/self.size[0],
-            (coord_max[1]-coord_min[1])/self.size[1]
-        )
-        self.axis.origin = [
-            0.5*(coord_min[0] + coord_max[0] - self.size[0]*self.axis.scale),
-            0.5*(coord_min[1] + coord_max[1] - self.size[1]*self.axis.scale)
-        ]
+        if self.tracked_star is None:
+            center = 0.5 * (coord_min + coord_max)
+        else:
+            center = coords[self.tracked_star]
 
-        glutPostRedisplay()
+        axis_size = 2 * np.maximum(center - coord_min, coord_max - center)
+        self.axis.scale = (1. + 2*border) * np.max(axis_size / self.size)
+        self.center_view(*center)
+
+    def center_view(self, x, y):
+        """ Center view on the given axis coordinates. """
+        self.axis.origin = [
+            x - 0.5 * self.size[0]*self.axis.scale,
+            y - 0.5 * self.size[1]*self.axis.scale
+        ]
 
     ###########################################################################
     # Internal methods
@@ -286,6 +303,10 @@ class Animation:
         coords = self.simu.coords()
         self.vbo_vertex.set_array(coords)
         self.count = coords.shape[0]
+
+        # Centering view on tracked star
+        if self.tracked_star is not None:
+            self.center_view(*coords[self.tracked_star])
 
     def _update_colors(self):
         """ Update or create Vertex Buffer Object of colors. """
@@ -346,6 +367,10 @@ class Animation:
             self.use_colors_update = not self.use_colors_update
         elif key == b'o':
             self.use_adaptative_opacity = not self.use_adaptative_opacity
+        elif key == b't':
+            self.tracked_star = self._find_nearest_star(x, y)
+        elif key == b'T':
+            self.tracked_star = None
         elif key == b'p' or key == b' ':
             self.is_paused = not self.is_paused
         elif key == b'h':
@@ -385,6 +410,8 @@ f: toggle fps display
 c: toggle colors display
 u: toggle colors update
 o: toggle adaptative opacity
+t: track nearest star
+T: disable tracking
 p: pause (or <space>)
 h: toggle help display""")
 
@@ -400,6 +427,11 @@ h: toggle help display""")
     def _print_fps(self):
         """ Calculate and print fps. """
         self._print("{:.1f}fps".format(self._fps()))
+
+    def _find_nearest_star(self, x, y):
+        """ Return the index of the nearest star from mouse coordinates. """
+        mouse_pos = self.axis.origin + self.axis.scale * np.asarray([x, self.size[1]-y])
+        return ((self.simu.coords() - mouse_pos) ** 2).sum(axis=1).argmin()
 
     def _activate_adaptative_opacity(self):
         """ Activate the adaptative opacity shader program. """
