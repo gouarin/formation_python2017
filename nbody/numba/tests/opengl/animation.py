@@ -13,14 +13,14 @@ import time
 from copy import deepcopy
 
 
-class Axis:
+class Axis(object):
     """ View axis. """
     def __init__(self, origin, scale):
         self.origin = origin
         self.scale = scale
 
 
-class Animation:
+class Animation(object):
     """ Simulation renderer using OpenGL.
 
     Press left button to move.
@@ -45,7 +45,7 @@ class Animation:
     """
 
     def __init__(self, simu,
-                 axis=[0, 1, 0, 1], size=[640, 480], title=b"Animation",
+                 axis=[0., 1., 0., 1.], size=[640, 480], title=b"Animation",
                  use_colors=False, update_colors=False,
                  use_adaptative_opacity=False, start_paused=False):
         """ Initialize an animation view.
@@ -72,8 +72,9 @@ class Animation:
         """
 
         self.simu = simu
-        self.axis = Axis([axis[0], axis[2]], max((axis[1]-axis[0])/size[0],
-                                                 (axis[3]-axis[2])/size[1]))
+        faxis = [float(v) for v in axis]
+        self.axis = Axis([faxis[0], faxis[2]], max((faxis[1]-faxis[0])/size[0],
+                                                   (faxis[3]-faxis[2])/size[1]))
         self.size = size
         self.mouse_action = None
 

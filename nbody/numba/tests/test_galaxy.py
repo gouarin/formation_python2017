@@ -80,7 +80,7 @@ if __name__ == '__main__':
                 ]
     sim = Galaxy(blackHole, display_step = args.display_step)
 
-    anim = Animation( sim, axis=[-10, 10, -10, 10] )
+    anim = Animation( sim, axis=[-10., 10., -10., 10.] )
 
     if args.render == 'opengl':
         anim.use_colors = True
