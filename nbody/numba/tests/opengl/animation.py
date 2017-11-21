@@ -237,7 +237,8 @@ class Animation(object):
         try:
             return self._ao_factor
         except AttributeError:
-            return self.axis.scale
+            self.ao_factor = self.axis.scale
+            return self._ao_factor
 
     @adaptative_opacity_factor.setter
     def adaptative_opacity_factor(self, value):
@@ -295,6 +296,14 @@ class Animation(object):
             x - 0.5 * self.size[0]*self.axis.scale,
             y - 0.5 * self.size[1]*self.axis.scale
         ]
+
+    def reset_display_params(self):
+        """ Set some display parameters accordingly to the current view.
+
+        Concerned parameters are:
+        - adaptative_opacity_factor = 1/zoom_factor
+        """
+        self.adaptative_opacity_factor = self.axis.scale
 
     ###########################################################################
     # Internal methods
@@ -358,6 +367,8 @@ class Animation(object):
         """ Called when a key is pressed. """
         if key == b'r':
             self.reset_view()
+        elif key == b'R':
+            self.reset_display_params()
         elif key == b'q':
             glutLeaveMainLoop()
         elif key == b'f':
@@ -406,6 +417,7 @@ class Animation(object):
         self._print(pos=[0, 1], text="""left click: translate view
 right click: zoom in/out
 r: reset view
+R: reset display params
 q: quit
 f: toggle fps display
 c: toggle colors display
