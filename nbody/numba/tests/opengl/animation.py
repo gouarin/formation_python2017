@@ -99,8 +99,8 @@ class Animation(object):
 
         # Create a Vertex Buffer Object for the vertices
         coords = simu.coords()
-        self.vbo_vertex = glvbo.VBO(coords)
-        self.count = coords.shape[0]
+        self._star_vbo = glvbo.VBO(coords)
+        self._star_count = coords.shape[0]
 
         # Display options
         self.use_colors_update = update_colors
@@ -204,26 +204,34 @@ class Animation(object):
         self._use_adaptative_opacity = value
 
         if value and not hasattr(self, '_ao_shader_program'):
-            # Try except ?
-            vertex_shader = shaders.compileShader("""
-                uniform float scale;
-                void main()
-                {
-                    gl_Position = ftransform();
-                    gl_FrontColor = gl_Color;
-                    gl_FrontColor[3] = min(1., gl_FrontColor[3]*scale);
-                }
-                """, GL_VERTEX_SHADER)
+            try:
+                vertex_shader = shaders.compileShader("""
+                    #version 120
+                    uniform float opacity_scale;
+                    void main()
+                    {
+                        gl_Position = ftransform();
+                        gl_FrontColor = gl_Color;
+                        gl_FrontColor[3] = min(1., gl_FrontColor[3]*opacity_scale);
+                    }
+                    """, GL_VERTEX_SHADER)
 
-            fragment_shader = shaders.compileShader("""
-                void main()
-                {
-                    gl_FragColor = gl_Color;
-                }
-                """, GL_FRAGMENT_SHADER)
+                fragment_shader = shaders.compileShader("""
+                    #version 120
+                    void main()
+                    {
+                        gl_FragColor = gl_Color;
+                    }
+                    """, GL_FRAGMENT_SHADER)
 
-            self._ao_shader_program = shaders.compileProgram(vertex_shader,
-                                                             fragment_shader)
+                self._ao_shader_program = shaders.compileProgram(
+                    vertex_shader,
+                    fragment_shader
+                )
+            except RuntimeError as e:
+                self._use_adaptative_opacity = False
+                print('Adaptative opacity failure: {}'.format(str(e)))
+
 
     @property
     def adaptative_opacity_factor(self):
@@ -311,8 +319,8 @@ class Animation(object):
     def _update_coords(self):
         """ Update vertex coordinates. """
         coords = self.simu.coords()
-        self.vbo_vertex.set_array(coords)
-        self.count = coords.shape[0]
+        self._star_vbo.set_array(coords)
+        self._star_count = coords.shape[0]
 
         # Centering view on tracked star
         if self.tracked_star is not None:
@@ -446,12 +454,44 @@ h: toggle help display""")
         mouse_pos = self.axis.origin + self.axis.scale * np.asarray([x, self.size[1]-y])
         return ((self.simu.coords() - mouse_pos) ** 2).sum(axis=1).argmin()
 
-    def _activate_adaptative_opacity(self):
-        """ Activate the adaptative opacity shader program. """
+    def _calc_opacity_factor(self):
+        """ Returns the factor applied to the opacity """
+        if self.use_adaptative_opacity:
+            return np.float32(max(0.01, self._ao_factor/self.axis.scale))
+        else:
+            return np.float32(1.)
 
-        glUseProgram(self._ao_shader_program)
-        glUniform1f(glGetUniformLocation(self._ao_shader_program, 'scale'),
-                    np.float32(max(0.01, self._ao_factor/self.axis.scale)))
+    def _bind_star_vbo(self):
+        """ Bind the vertex buffer object with star coordinates. """
+        # Bind the vertex VBO
+        self._star_vbo.bind()
+
+        # Tell OpenGL that the VBO contains an array of vertices
+        glEnableClientState(GL_VERTEX_ARRAY)
+
+        # These vertices contain 2 double precision coordinates
+        glVertexPointer(2, GL_DOUBLE, 0, None)
+
+    def _draw_pixels(self, frame_buffer=0):
+        """ Draw stars as pixels.
+
+        frame_buffer: int
+            OpenGL frame buffer id.
+        """
+
+        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer)
+        self._bind_star_vbo()
+
+        # Choose appropriate shader program
+        if self.use_adaptative_opacity:
+            glUseProgram(self._ao_shader_program)
+            glUniform1f(glGetUniformLocation(self._ao_shader_program, 'opacity_scale'),
+                        self._calc_opacity_factor())
+        else:
+            glUseProgram(0)
+
+        # Draw "count" points from the VBO
+        glDrawArrays(GL_POINTS, 0, self._star_count)
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -471,29 +511,14 @@ h: toggle help display""")
                 self.axis.origin[1], self.axis.origin[1] + self.axis.scale * self.size[1],
                 -1, 1)
 
-        # Adaptative opacity
-        if self.use_adaptative_opacity:
-            self._activate_adaptative_opacity()
-        else:
-            glUseProgram(0)
-
         # Background color
         glClearColor(0., 0., 0., 0.)
 
         # Draw color
         glColor(1., 1., 1.)
 
-        # Bind the vertex VBO
-        self.vbo_vertex.bind()
-
-        # Tell OpenGL that the VBO contains an array of vertices
-        glEnableClientState(GL_VERTEX_ARRAY)
-
-        # These vertices contain 2 double precision coordinates
-        glVertexPointer(2, GL_DOUBLE, 0, None)
-
-        # Draw "count" points from the VBO
-        glDrawArrays(GL_POINTS, 0, self.count)
+        # Draw stars as pixels
+        self._draw_pixels()
 
         # Printing fps
         if self.use_fps:
