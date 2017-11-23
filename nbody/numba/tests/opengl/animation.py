@@ -129,8 +129,9 @@ class Animation(object):
                 if self.use_colors_update or not hasattr(self, 'vbo_color'):
                     self._update_colors()
                 glEnableClientState(GL_COLOR_ARRAY)
-            except AttributeError:
+            except AttributeError as e:
                 self._use_colors = False
+                print('Cannot update star colors: {}'.format(str(e)))
 
         if not self._use_colors:
             glDisableClientState(GL_COLOR_ARRAY)
