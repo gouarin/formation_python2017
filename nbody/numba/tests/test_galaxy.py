@@ -86,6 +86,8 @@ if __name__ == '__main__':
         anim.use_colors = True
         anim.use_colors_update = False
         anim.use_adaptative_opacity = True
+        anim.use_pixel_render = False
+        anim.use_nebulae_render = True
 
     anim.main_loop()
 

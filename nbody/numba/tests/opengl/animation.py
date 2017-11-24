@@ -208,12 +208,12 @@ class Animation(object):
             try:
                 vertex_shader = shaders.compileShader("""
                     #version 120
-                    uniform float opacity_scale;
+                    uniform float opacity_factor;
                     void main()
                     {
                         gl_Position = ftransform();
                         gl_FrontColor = gl_Color;
-                        gl_FrontColor[3] = min(1., gl_FrontColor[3]*opacity_scale);
+                        gl_FrontColor[3] = min(1., gl_FrontColor[3]*opacity_factor);
                     }
                     """, GL_VERTEX_SHADER)
 
@@ -265,6 +265,171 @@ class Animation(object):
     def tracked_star(self, value):
         self._tracked_star = value
 
+    @property
+    def star_radius(self):
+        """ Radius of the stars when using nebulae display. """
+        try:
+            return self._star_radius
+        except AttributeError:
+            return 1e-4
+
+    @star_radius.setter
+    def star_radius(self, value):
+        self._star_radius = value
+
+    @property
+    def star_min_pixel_size(self):
+        """ Minimal pixel size of the stars when using nebulae display.
+
+        A value of one correspond to the size of a pixel.
+        """
+        try:
+            return self._star_min_pixel_size
+        except AttributeError:
+            return 1.
+
+    @star_min_pixel_size.setter
+    def star_min_pixel_size(self, value):
+        self._star_min_pixel_size = value
+
+    @property
+    def nebulae_max_radius(self):
+        """ Maximal radius of the nebuale. """
+        try:
+            return self._nebulae_max_radius
+        except AttributeError:
+            return 0.3
+
+    @nebulae_max_radius.setter
+    def nebulae_max_radius(self, value):
+        self._nebulae_max_radius = value
+
+    @property
+    def nebulae_radius_factor(self):
+        """ Factor controlling how the nebulae radius varies with the view scale.
+
+        The nebulae decreases to the star radius when zooming in.
+        This factor control how fast it converges.
+
+        For a given view/zoom, setting this factor to
+        the ratio between the axis width/height and
+        the screen width/height (i.e. the zoom factor)
+        results in the maximal nebuale rendered radius.
+        """
+        try:
+            return self._nebulae_radius_factor
+        except AttributeError:
+            self._nebulae_radius_factor = self.axis.scale
+            return self._nebulae_radius_factor
+
+    @nebulae_radius_factor.setter
+    def nebulae_radius_factor(self, value):
+        self._nebulae_radius_factor = value
+
+    @property
+    def nebulae_density_factor(self):
+        """ Density reduction factor of the nebulae.
+
+        The opacity of the nubulae varies as
+            alpha/r
+        with alpha the density redution factor
+        and r the distance to the star.
+        """
+        try:
+            return self._nebulae_density_factor
+        except AttributeError:
+            return 9e-3
+
+    @nebulae_density_factor.setter
+    def nebulae_density_factor(self, value):
+        self._nebulae_density_factor = value
+
+    @property
+    def use_pixel_render(self):
+        """ Control star rendering as pixels. """
+        try:
+            return self._use_pixel_render
+        except AttributeError:
+            return True
+
+    @use_pixel_render.setter
+    def use_pixel_render(self, value):
+        self._use_pixel_render = value
+
+    @property
+    def use_nebulae_render(self):
+        """ Control star rendering as nebulae. """
+        try:
+            return self._use_nebulae_render
+        except AttributeError:
+            return False
+
+    @use_nebulae_render.setter
+    def use_nebulae_render(self, value):
+        self._use_nebulae_render = value
+
+        if value and not hasattr(self, '_nebulae_shader_program'):
+            try:
+                vertex_shader = shaders.compileShader("""
+                    #version 120
+                    uniform float opacity_factor;
+                    uniform float view_scale;
+                    uniform float radius_factor;
+                    uniform float max_nebulae_radius;
+                    uniform float star_radius;
+                    uniform float min_pixel_size;
+                    uniform float density_factor;
+
+                    varying float distance_shift;
+                    varying float opacity_shift;
+
+                    void main()
+                    {
+                        gl_Position = ftransform();
+
+                        // Defining the nebulae constraints
+                        float max_sprite_radius = max(0.5f * min_pixel_size, max_nebulae_radius/view_scale);
+                        float min_sprite_radius = max(0.5f * min_pixel_size, star_radius/view_scale);
+                        float nebulae_radius    = min(max_sprite_radius,
+                                                      min_sprite_radius + (max_sprite_radius - min_sprite_radius) * view_scale/radius_factor);
+                        float max_opacity = min(1.f, gl_Color[3] * opacity_factor);
+
+                        // Finding parameter sets that fits the nebulae constraints
+                        float delta    = max_opacity * (max_opacity - 8*density_factor/(min_sprite_radius/nebulae_radius - 1.f));
+                        opacity_shift  = 0.5f * ( max_opacity - sqrt(delta) );
+                        distance_shift = -density_factor/opacity_shift - 0.5f;
+
+                        // Customizing sprite
+                        gl_PointSize = 2.f * nebulae_radius;
+                        gl_FrontColor = gl_Color;
+                        gl_FrontColor[3] = max_opacity;
+                    }
+                    """, GL_VERTEX_SHADER)
+
+                fragment_shader = shaders.compileShader("""
+                    #version 120
+                    uniform float density_factor;
+
+                    varying float distance_shift;
+                    varying float opacity_shift;
+
+                    void main()
+                    {
+                        gl_FragColor = gl_Color;
+                        float dist = length(gl_PointCoord - vec2(0.5, 0.5));
+                        gl_FragColor[3] = dist > -distance_shift ? clamp(density_factor/(dist + distance_shift) + opacity_shift, 0.f, gl_FragColor[3]) : gl_FragColor[3];
+                    }
+                    """, GL_FRAGMENT_SHADER)
+
+                self._nebulae_shader_program = shaders.compileProgram(
+                    vertex_shader,
+                    fragment_shader
+                )
+            except RuntimeError as e:
+                self._use_nebulae_render = False
+                print('Nebulae render failure: {}'.format(str(e)))
+
+
     ###########################################################################
     # Public methods
 
@@ -313,6 +478,7 @@ class Animation(object):
         - adaptative_opacity_factor = 1/zoom_factor
         """
         self.adaptative_opacity_factor = self.axis.scale
+        self.nebulae_radius_factor = self.axis.scale
 
     ###########################################################################
     # Internal methods
@@ -388,6 +554,10 @@ class Animation(object):
             self.use_colors_update = not self.use_colors_update
         elif key == b'o':
             self.use_adaptative_opacity = not self.use_adaptative_opacity
+        elif key == b's':
+            self.use_pixel_render = not self.use_pixel_render
+        elif key == b'n':
+            self.use_nebulae_render = not self.use_nebulae_render
         elif key == b't':
             self.tracked_star = self._find_nearest_star(x, y)
         elif key == b'T':
@@ -432,6 +602,8 @@ f: toggle fps display
 c: toggle colors display
 u: toggle colors update
 o: toggle adaptative opacity
+s: toggle star display (pixels)
+n: toggle nebulae display
 t: track nearest star
 T: disable tracking
 p: pause (or <space>)
@@ -458,9 +630,9 @@ h: toggle help display""")
     def _calc_opacity_factor(self):
         """ Returns the factor applied to the opacity """
         if self.use_adaptative_opacity:
-            return np.float32(max(0.01, self._ao_factor/self.axis.scale))
+            return max(0.01, self._ao_factor/self.axis.scale)
         else:
-            return np.float32(1.)
+            return 1.
 
     def _bind_star_vbo(self):
         """ Bind the vertex buffer object with star coordinates. """
@@ -486,13 +658,46 @@ h: toggle help display""")
         # Choose appropriate shader program
         if self.use_adaptative_opacity:
             glUseProgram(self._ao_shader_program)
-            glUniform1f(glGetUniformLocation(self._ao_shader_program, 'opacity_scale'),
+            glUniform1f(glGetUniformLocation(self._ao_shader_program, 'opacity_factor'),
                         self._calc_opacity_factor())
         else:
             glUseProgram(0)
 
         # Draw "count" points from the VBO
         glDrawArrays(GL_POINTS, 0, self._star_count)
+
+    def _draw_nebulae(self, frame_buffer=0):
+        """ Draw stars as nebulae.
+
+        frame_buffer: int
+            OpenGL frame buffer id.
+        """
+
+        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer)
+        self._bind_star_vbo()
+
+        # Enabling sprite and point size
+        glEnable(GL_PROGRAM_POINT_SIZE)
+        glEnable(GL_POINT_SPRITE)
+
+        # Loading shader program and binding variables
+        glUseProgram(self._nebulae_shader_program)
+
+        bind_uniform_1f = lambda name, value: glUniform1f(glGetUniformLocation(self._nebulae_shader_program, name), value)
+        bind_uniform_1f('opacity_factor', self._calc_opacity_factor())
+        bind_uniform_1f('view_scale', self.axis.scale)
+        bind_uniform_1f('radius_factor', self.nebulae_radius_factor)
+        bind_uniform_1f('max_nebulae_radius', self.nebulae_max_radius)
+        bind_uniform_1f('star_radius', self.star_radius)
+        bind_uniform_1f('min_pixel_size', self.star_min_pixel_size)
+        bind_uniform_1f('density_factor', self.nebulae_density_factor)
+
+        # Draw "count" point sprites from the VBO
+        glDrawArrays(GL_POINTS, 0, self._star_count)
+
+        # Disabling sprite and point size
+        glDisable(GL_PROGRAM_POINT_SIZE)
+        glDisable(GL_POINT_SPRITE)
 
     def _draw(self):
         """ Called when the window must be redrawn. """
@@ -518,8 +723,13 @@ h: toggle help display""")
         # Draw color
         glColor(1., 1., 1.)
 
+        # Draw stars as nebulae
+        if self.use_nebulae_render:
+            self._draw_nebulae()
+
         # Draw stars as pixels
-        self._draw_pixels()
+        if self.use_pixel_render:
+            self._draw_pixels()
 
         # Printing fps
         if self.use_fps:
