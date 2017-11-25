@@ -116,51 +116,51 @@ class Animation(object):
     def use_colors(self):
         """ Control color display. """
         try:
-            return self._use_colors
+            return self.__use_colors
         except AttributeError:
             return False
 
     @use_colors.setter
     def use_colors(self, value):
-        self._use_colors = value
+        self.__use_colors = value
 
-        if self._use_colors:
+        if self.__use_colors:
             try:
                 if self.use_colors_update or not hasattr(self, 'vbo_color'):
                     self._update_colors()
                 glEnableClientState(GL_COLOR_ARRAY)
             except AttributeError as e:
-                self._use_colors = False
+                self.__use_colors = False
                 print('Cannot update star colors: {}'.format(str(e)))
 
-        if not self._use_colors:
+        if not self.__use_colors:
             glDisableClientState(GL_COLOR_ARRAY)
 
     @property
     def use_colors_update(self):
         """ Control color update for each frame. """
         try:
-            return self._use_colors_update
+            return self.__use_colors_update
         except AttributeError:
             return False
 
     @use_colors_update.setter
     def use_colors_update(self, value):
-        self._use_colors_update = value
+        self.__use_colors_update = value
 
     @property
     def use_fps(self):
         """ Control the display of the fps. """
         try:
-            return self._use_fps
+            return self.__use_fps
         except AttributeError:
             return False
 
     @use_fps.setter
     def use_fps(self, value):
-        self._use_fps = value
+        self.__use_fps = value
 
-        if self._use_fps:
+        if self.__use_fps:
             # To calculate the fps
             self.frame_times = [time.time()] * 50
             self.frame_id = 0
@@ -169,25 +169,25 @@ class Animation(object):
     def is_paused(self):
         """ Control the execution of the simulation. """
         try:
-            return self._is_paused
+            return self.__is_paused
         except AttributeError:
             return False
 
     @is_paused.setter
     def is_paused(self, value):
-        self._is_paused = value
+        self.__is_paused = value
 
     @property
     def use_help(self):
         """ Control help display. """
         try:
-            return self._use_help
+            return self.__use_help
         except AttributeError:
             return False
 
     @use_help.setter
     def use_help(self, value):
-        self._use_help = value
+        self.__use_help = value
 
     @property
     def use_adaptative_opacity(self):
@@ -196,13 +196,13 @@ class Animation(object):
         Opacity varies linearly with the zoom factor.
         """
         try:
-            return self._use_adaptative_opacity
+            return self.__use_adaptative_opacity
         except AttributeError:
             return False
 
     @use_adaptative_opacity.setter
     def use_adaptative_opacity(self, value):
-        self._use_adaptative_opacity = value
+        self.__use_adaptative_opacity = value
 
         if value and not hasattr(self, '_ao_shader_program'):
             try:
@@ -230,7 +230,7 @@ class Animation(object):
                     fragment_shader
                 )
             except RuntimeError as e:
-                self._use_adaptative_opacity = False
+                self.__use_adaptative_opacity = False
                 print('Adaptative opacity failure: {}'.format(str(e)))
 
     @property
@@ -243,38 +243,38 @@ class Animation(object):
         doesn't change the display.
         """
         try:
-            return self._ao_factor
+            return self.__ao_factor
         except AttributeError:
             self.ao_factor = self.axis.scale
-            return self._ao_factor
+            return self.__ao_factor
 
     @adaptative_opacity_factor.setter
     def adaptative_opacity_factor(self, value):
-        self._ao_factor = value
+        self.__ao_factor = value
 
     @property
     def tracked_star(self):
         """ Id of the tracked star. None if disabled. """
         try:
-            return self._tracked_star
+            return self.__tracket_star
         except AttributeError:
             return None
 
     @tracked_star.setter
     def tracked_star(self, value):
-        self._tracked_star = value
+        self.__tracket_star = value
 
     @property
     def star_radius(self):
         """ Radius of the stars when using nebulae display. """
         try:
-            return self._star_radius
+            return self.__star_radius
         except AttributeError:
             return 1e-4
 
     @star_radius.setter
     def star_radius(self, value):
-        self._star_radius = value
+        self.__star_radius = value
 
     @property
     def star_min_pixel_size(self):
@@ -283,25 +283,25 @@ class Animation(object):
         A value of one correspond to the size of a pixel.
         """
         try:
-            return self._star_min_pixel_size
+            return self.__star_min_pixel_size
         except AttributeError:
             return 1.
 
     @star_min_pixel_size.setter
     def star_min_pixel_size(self, value):
-        self._star_min_pixel_size = value
+        self.__star_min_pixel_size = value
 
     @property
     def nebulae_max_radius(self):
         """ Maximal radius of the nebuale. """
         try:
-            return self._nebulae_max_radius
+            return self.__nebulae_max_radius
         except AttributeError:
             return 0.3
 
     @nebulae_max_radius.setter
     def nebulae_max_radius(self, value):
-        self._nebulae_max_radius = value
+        self.__nebulae_max_radius = value
 
     @property
     def nebulae_radius_factor(self):
@@ -316,14 +316,14 @@ class Animation(object):
         results in the maximal nebuale rendered radius.
         """
         try:
-            return self._nebulae_radius_factor
+            return self.__nebulae_radius_factor
         except AttributeError:
-            self._nebulae_radius_factor = self.axis.scale
-            return self._nebulae_radius_factor
+            self.__nebulae_radius_factor = self.axis.scale
+            return self.__nebulae_radius_factor
 
     @nebulae_radius_factor.setter
     def nebulae_radius_factor(self, value):
-        self._nebulae_radius_factor = value
+        self.__nebulae_radius_factor = value
 
     @property
     def nebulae_density_factor(self):
@@ -335,37 +335,37 @@ class Animation(object):
         and r the distance to the star.
         """
         try:
-            return self._nebulae_density_factor
+            return self.__nebulae_density_factor
         except AttributeError:
             return 9e-3
 
     @nebulae_density_factor.setter
     def nebulae_density_factor(self, value):
-        self._nebulae_density_factor = value
+        self.__nebulae_density_factor = value
 
     @property
     def use_pixel_render(self):
         """ Control star rendering as pixels. """
         try:
-            return self._use_pixel_render
+            return self.__use_pixel_render
         except AttributeError:
             return True
 
     @use_pixel_render.setter
     def use_pixel_render(self, value):
-        self._use_pixel_render = value
+        self.__use_pixel_render = value
 
     @property
     def use_nebulae_render(self):
         """ Control star rendering as nebulae. """
         try:
-            return self._use_nebulae_render
+            return self.__use_nebulae_render
         except AttributeError:
             return False
 
     @use_nebulae_render.setter
     def use_nebulae_render(self, value):
-        self._use_nebulae_render = value
+        self.__use_nebulae_render = value
 
         if value and not hasattr(self, '_nebulae_shader_program'):
             try:
@@ -425,7 +425,7 @@ class Animation(object):
                     fragment_shader
                 )
             except RuntimeError as e:
-                self._use_nebulae_render = False
+                self.__use_nebulae_render = False
                 print('Nebulae render failure: {}'.format(str(e)))
 
     ###########################################################################
@@ -638,7 +638,7 @@ h: toggle help display""")
     def _calc_opacity_factor(self):
         """ Returns the factor applied to the opacity """
         if self.use_adaptative_opacity:
-            return max(0.01, self._ao_factor/self.axis.scale)
+            return max(0.01, self.__ao_factor/self.axis.scale)
         else:
             return 1.
 
