@@ -13,13 +13,6 @@ import time
 from copy import deepcopy
 
 
-class Axis(object):
-    """ View axis. """
-    def __init__(self, origin, scale):
-        self.origin = origin
-        self.scale = scale
-
-
 class Animation(object):
     """ Simulation renderer using OpenGL.
 
@@ -73,8 +66,9 @@ class Animation(object):
 
         self.simu = simu
         faxis = [float(v) for v in axis]
-        self.axis = Axis([faxis[0], faxis[2]], max((faxis[1]-faxis[0])/size[0],
-                                                   (faxis[3]-faxis[2])/size[1]))
+        self.axis = Animation._Axis([faxis[0], faxis[2]],
+                                    max((faxis[1]-faxis[0])/size[0],
+                                        (faxis[3]-faxis[2])/size[1]))
         self.size = size
         self.mouse_action = None
 
@@ -477,6 +471,15 @@ class Animation(object):
         """
         self.adaptative_opacity_factor = self.axis.scale
         self.nebulae_radius_factor = self.axis.scale
+
+    ###########################################################################
+    # Internal classes
+
+    class _Axis(object):
+        """ View axis. """
+        def __init__(self, origin, scale):
+            self.origin = origin
+            self.scale = scale
 
     ###########################################################################
     # Internal methods
