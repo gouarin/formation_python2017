@@ -526,15 +526,26 @@ class Animation(object):
 
     def _motion(self, x, y):
         """ Called when the mouse has move while a button is pressed. """
-        if self.mouse_action == 'move':
+        # Disable view translation when tracking a star, unless simulation is paused.
+        if self.mouse_action == 'move' and (self.tracked_star is None or self.is_paused):
             self.axis.origin[0] = self.old_axis.origin[0] - self.old_axis.scale * (x - self.x_start)
             self.axis.origin[1] = self.old_axis.origin[1] + self.old_axis.scale * (y - self.y_start)
 
         elif self.mouse_action == 'zoom':
             zoom_factor = math.exp(0.01 * (self.y_start - y))
-            self.axis.origin[0] = self.old_axis.origin[0] + (1 - zoom_factor) * self.old_axis.scale * self.x_start
-            self.axis.origin[1] = self.old_axis.origin[1] + (1 - zoom_factor) * self.old_axis.scale * (self.size[1]-self.y_start)
-            self.axis.scale = zoom_factor * self.old_axis.scale
+
+            # By default, zooming is focused on the coordinates initialy pointed by the mouse
+            #   but if a star is tracked and the simulation is not paused,
+            #   then the focus is on this star.
+            if self.tracked_star is None or self.is_paused:
+                self.axis.origin[0] = self.old_axis.origin[0] + (1 - zoom_factor) * self.old_axis.scale * self.x_start
+                self.axis.origin[1] = self.old_axis.origin[1] + (1 - zoom_factor) * self.old_axis.scale * (self.size[1]-self.y_start)
+                self.axis.scale = zoom_factor * self.old_axis.scale
+            else:
+                star_coords = self.simu.coords()[self.tracked_star]
+                self.axis.scale = zoom_factor * self.old_axis.scale
+                self.center_view(star_coords[0], star_coords[1])
+
 
         glutPostRedisplay()
 
