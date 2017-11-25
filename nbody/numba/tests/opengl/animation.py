@@ -233,7 +233,6 @@ class Animation(object):
                 self._use_adaptative_opacity = False
                 print('Adaptative opacity failure: {}'.format(str(e)))
 
-
     @property
     def adaptative_opacity_factor(self):
         """ Control the adaptative opacity amplitude.
@@ -429,7 +428,6 @@ class Animation(object):
                 self._use_nebulae_render = False
                 print('Nebulae render failure: {}'.format(str(e)))
 
-
     ###########################################################################
     # Public methods
 
@@ -545,7 +543,6 @@ class Animation(object):
                 star_coords = self.simu.coords()[self.tracked_star]
                 self.axis.scale = zoom_factor * self.old_axis.scale
                 self.center_view(star_coords[0], star_coords[1])
-
 
         glutPostRedisplay()
 
@@ -694,7 +691,9 @@ h: toggle help display""")
         # Loading shader program and binding variables
         glUseProgram(self._nebulae_shader_program)
 
-        bind_uniform_1f = lambda name, value: glUniform1f(glGetUniformLocation(self._nebulae_shader_program, name), value)
+        def bind_uniform_1f(name, value):
+            glUniform1f(glGetUniformLocation(self._nebulae_shader_program, name), value)
+
         bind_uniform_1f('opacity_factor', self._calc_opacity_factor())
         bind_uniform_1f('view_scale', self.axis.scale)
         bind_uniform_1f('radius_factor', self.nebulae_radius_factor)
