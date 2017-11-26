@@ -3,8 +3,9 @@ import sys
 import math
 
 import nbody
-#from nbody.naive import compute_energy
+# from nbody.naive import compute_energy
 from nbody.barnes_hut_array import compute_energy
+
 
 def temp2color(temps):
     """ Convert black body temperature to corresponding RGBA color.
@@ -39,7 +40,7 @@ def temp2color(temps):
 
 
 class Galaxy:
-    def __init__(self, blackHole, dt = 1., display_step = 1):
+    def __init__(self, blackHole, dt=1., display_step=1):
         self.mass, self.particles = nbody.init_collisions(blackHole)
         self.time_method = nbody.ADB6(dt, self.particles.shape[0], compute_energy)
         self.display_step = display_step
@@ -59,7 +60,7 @@ class Galaxy:
         speed_min = speed_magnitude.min()
         speed_max = speed_magnitude.max()
         colors = temp2color(3000 + 6000*(speed_magnitude-speed_min)/(speed_max - speed_min))
-        colors[:,3] = 0.05
+        colors[:, 3] = 0.05
         return colors + np.asarray([0., 0., 0., 0.95]) * np.minimum(self.mass, 20).reshape(-1, 1) / 20
 
 
@@ -80,9 +81,9 @@ if __name__ == '__main__':
                 {'coord': [0, 0], 'mass': 1000000, 'svel': 1, 'stars': 2000, 'radstars': 3},
                 {'coord': [3, 3], 'mass': 1000000, 'svel': 0.9, 'stars': 1000, 'radstars': 1}
                 ]
-    sim = Galaxy(blackHole, display_step = args.display_step)
+    sim = Galaxy(blackHole, display_step=args.display_step)
 
-    anim = Animation( sim, axis=[-10., 10., -10., 10.] )
+    anim = Animation(sim, axis=[-10., 10., -10., 10.])
 
     if args.render == 'opengl':
         anim.use_colors = True
@@ -92,4 +93,3 @@ if __name__ == '__main__':
         anim.use_nebulae_render = True
 
     anim.main_loop()
-
