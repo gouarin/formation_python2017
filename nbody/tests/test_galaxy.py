@@ -56,7 +56,9 @@ class Galaxy:
 
     def colors(self):
         speed_magnitude = np.linalg.norm(self.particles[:, 2:4], axis=1)
-        colors = temp2color( 3000 + 6000*speed_magnitude/speed_magnitude.max() )
+        speed_min = speed_magnitude.min()
+        speed_max = speed_magnitude.max()
+        colors = temp2color(3000 + 6000*(speed_magnitude-speed_min)/(speed_max - speed_min))
         colors[:,3] = 0.05
         return colors + np.asarray([0., 0., 0., 0.95]) * np.minimum(self.mass, 20).reshape(-1, 1) / 20
 
