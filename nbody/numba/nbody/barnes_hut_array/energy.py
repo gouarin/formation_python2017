@@ -1,4 +1,4 @@
-from __future__ import print_function
+from six import print_
 
 import numpy as np
 from .quadTree import quadArray
@@ -22,23 +22,23 @@ def compute_energy(mass, particles, energy):
     bmax = np.max(particles[: ,:2], axis=0)
     root = quadArray(bmin, bmax, particles.shape[0])
 
-    print('\tbuild tree:    ', end='', flush=True)
+    print_('\tbuild tree:    ', end='', flush=True)
     t1 = time.time()
     root.buildTree(particles)
     t2 = time.time()
-    print('{:9.4f}ms'.format(1000*(t2-t1)))
+    print_('{:9.4f}ms'.format(1000*(t2-t1)))
 
-    print('\tcompute mass:  ', end='', flush=True)
+    print_('\tcompute mass:  ', end='', flush=True)
     t1 = time.time()
     root.computeMassDistribution(particles, mass)
     t2 = time.time()
-    print('{:9.4f}ms'.format(1000*(t2-t1)))
+    print_('{:9.4f}ms'.format(1000*(t2-t1)))
 
-    print('\tcompute force: ', end='', flush=True)
+    print_('\tcompute force: ', end='', flush=True)
     t1 = time.time()    
     compute_force( root.nbodies, root.child, root.center_of_mass, root.mass, root.cell_radius, particles, energy )
     energy[:, :2] = particles[:, 2:]
     t2 = time.time()
-    print('{:9.4f}ms'.format(1000*(t2-t1)))
+    print_('{:9.4f}ms'.format(1000*(t2-t1)))
 
-    print('\ttotal:       {:11.4f}ms'.format(1000*(time.time()-t_tot)))
+    print_('\ttotal:       {:11.4f}ms'.format(1000*(time.time()-t_tot)))
