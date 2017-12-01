@@ -1,5 +1,5 @@
 import numpy as np
-from .physics import gamma_1
+from .physics import gamma_1, gamma_si
 
 def init_solar_system():
     bodies = np.array([[        0, 0, 0,      0], #sun
@@ -33,7 +33,7 @@ def getOrbitalVelocity(xb, yb, mb, xs, ys):
     dist = np.sqrt(r[0] * r[0] + r[1] * r[1])
 
     # Based on the distance from the sun calculate the velocity needed to maintain a circular orbit
-    v = np.sqrt(gamma_1 * mb / dist)
+    v = np.sqrt(gamma_si * mb / dist)
 
     # Calculate a suitable vector perpendicular to r for the velocity of the tracer
     vxs = ( r[1] / dist) * v
@@ -65,7 +65,7 @@ def init_collisions(blackHole):
 
         nstars = b['stars']
         rad = b['radstars']
-        r = 0.1 + .8 * (rad * np.random.rand(nstars))
+        r = 0.3 + .8 * (rad * np.random.rand(nstars))
         a = 2*np.pi*np.random.rand(nstars)
         tmp_mass = 0.03 + 20*np.random.rand(nstars)
         x = b['coord'][0] + r*np.sin(a)
@@ -75,8 +75,8 @@ def init_collisions(blackHole):
 
         particles[ind:ind+nstars, 0] = x
         particles[ind:ind+nstars, 1] = y
-        particles[ind:ind+nstars, 2] = 1e2 * (vx + vxb)
-        particles[ind:ind+nstars, 3] = 1e2 * (vy + vyb)
+        particles[ind:ind+nstars, 2] = vx + vxb
+        particles[ind:ind+nstars, 3] = vy + vyb
         mass[ind:ind+nstars] = tmp_mass
         ind += nstars
 
