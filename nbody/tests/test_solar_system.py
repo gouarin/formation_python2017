@@ -2,14 +2,16 @@ import numpy as np
 import sys
 
 import nbody
-# from nbody.naive import compute_energy
+#from nbody.naive import compute_energy
 from nbody.barnes_hut_array import compute_energy
 
 
 class SolarSystem:
     def __init__(self, dt=nbody.physics.day_in_sec, display_step=1):
         self.mass, self.particles = nbody.init_solar_system()
-        self.time_method = nbody.RK4(dt, self.particles.shape[0], compute_energy)
+        #self.time_method = nbody.RK4(dt, self.particles.shape[0], compute_energy)
+        #self.time_method = nbody.Euler_symplectic(dt, self.particles.shape[0], compute_energy)
+        self.time_method = nbody.Optimized_815(dt, self.particles.shape[0], compute_energy)
         self.display_step = display_step
 
     def next(self):
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     sys.path.append(args.render)
     from animation import Animation
 
-    sim = SolarSystem(nbody.physics.day_in_sec, display_step=args.display_step)
+    sim = SolarSystem(10*nbody.physics.day_in_sec, display_step=args.display_step)
 
     bmin = np.min(sim.coords(), axis=0)
     bmax = np.max(sim.coords(), axis=0)

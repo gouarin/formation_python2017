@@ -40,9 +40,12 @@ def temp2color(temps):
 
 
 class Galaxy:
-    def __init__(self, blackHole, dt=1., display_step=1):
+    def __init__(self, blackHole, dt=10., display_step=1):
         self.mass, self.particles = nbody.init_collisions(blackHole)
-        self.time_method = nbody.ADB6(dt, self.particles.shape[0], compute_energy)
+        #self.time_method = nbody.ADB6(dt, self.particles.shape[0], compute_energy)
+        #self.time_method = nbody.Euler_symplectic(dt, self.particles.shape[0], compute_energy)
+        self.time_method = nbody.Stormer_verlet(dt, self.particles.shape[0], compute_energy)
+        #self.time_method = nbody.Optimized_815(dt, self.particles.shape[0], compute_energy)
         self.display_step = display_step
         self.it = 0
 
