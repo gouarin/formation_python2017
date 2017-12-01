@@ -14,7 +14,7 @@ class quadArray:
         self.cell_center = np.zeros((2*size+1, 2))
         self.cell_radius = np.zeros(2*size+1)
         self.cell_center[0] = self.center
-        self.cell_radius[0] = self.box_size
+        self.cell_radius[0] = 0.5*self.box_size
 
     def buildTree(self, particles):
         self.ncell = numba_functions.buildTree(self.center, self.box_size, self.child, self.cell_center, self.cell_radius, particles)
