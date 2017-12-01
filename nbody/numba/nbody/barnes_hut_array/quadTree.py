@@ -9,10 +9,10 @@ class quadArray:
         self.bmin = np.asarray(bmin)
         self.bmax = np.asarray(bmax)
         self.center = .5*(self.bmin + self.bmax)
-        self.box_size = (self.bmax - self.bmin)
+        self.box_size = (self.bmax - self.bmin).max()
         self.ncell = 0
         self.cell_center = np.zeros((2*size+1, 2))
-        self.cell_radius = np.zeros((2*size+1, 2))
+        self.cell_radius = np.zeros(2*size+1)
         self.cell_center[0] = self.center
         self.cell_radius[0] = self.box_size
 

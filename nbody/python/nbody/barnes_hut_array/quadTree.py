@@ -8,17 +8,17 @@ class quadArray:
         self.bmin = np.asarray(bmin)
         self.bmax = np.asarray(bmax)
         self.center = .5*(self.bmin + self.bmax)
-        self.box_size = (self.bmax - self.bmin)
+        self.box_size = (self.bmax - self.bmin).max()
         self.ncell = 0
         self.cell_center = np.zeros((2*size+1, 2))
-        self.cell_radius = np.zeros((2*size+1, 2))
+        self.cell_radius = np.zeros(2*size+1)
         self.cell_center[0] = self.center
         self.cell_radius[0] = self.box_size
 
     def buildTree(self, particles):
         for ip, p in enumerate(particles):
             center = self.center.copy()
-            box_size = self.box_size.copy()
+            box_size = self.box_size
             x, y = p[:2]
             cell = 0
 
@@ -55,13 +55,13 @@ class quadArray:
                     center[:] = self.cell_center[cell]
                     box_size = .5*self.cell_radius[cell]
                     if (oldchildPath&1):
-                        center[0] += box_size[0]
+                        center[0] += box_size
                     else:
-                        center[0] -= box_size[0]
+                        center[0] -= box_size
                     if ((oldchildPath>>1)&1):
-                        center[1] += box_size[1]
+                        center[1] += box_size
                     else:
-                        center[1] -= box_size[1]
+                        center[1] -= box_size
 
                     oldchildPath = 0
                     if particles[npart][0] > center[0]:
@@ -125,7 +125,7 @@ class quadArray:
                         dx = self.center_of_mass[child, 0] - pos[0]
                         dy = self.center_of_mass[child, 1] - pos[1]
                         dist = np.sqrt(dx**2 + dy**2)
-                        if dist != 0 and self.cell_radius[child - self.nbodies][0]/dist <.5:
+                        if dist != 0 and self.cell_radius[child - self.nbodies]/dist <.5:
                             F = force(pos, self.center_of_mass[child], self.mass[child])
                             acc += F
                         else:
