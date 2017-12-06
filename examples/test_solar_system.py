@@ -51,12 +51,12 @@ if __name__ == '__main__':
     display_step = int(args['--step'])
     render_engine = args['--render']
 
-    sim = SolarSystem(10*pygalaxy.physics.day_in_sec,
-                      display_step=display_step)
-
     # Importing the right class for rendering from the right module
     anim_module = importlib.import_module('pygalaxy.'+render_engine)
     Animation = getattr(anim_module, 'Animation')
+
+    sim = SolarSystem(10*pygalaxy.physics.day_in_sec,
+                      display_step=display_step)
 
     bmin = np.min(sim.coords(), axis=0)
     bmax = np.max(sim.coords(), axis=0)

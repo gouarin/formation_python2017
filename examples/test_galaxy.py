@@ -1,10 +1,29 @@
-import numpy as np
-import sys
-import math
+#!/usr/bin/env python
 
-import nbody
-# from nbody.naive import compute_energy
-from nbody.barnes_hut_array import compute_energy
+"""
+This program uses the Barnes-Hut algorithm to solve the N-body problem on the
+galaxy.
+
+
+Usage:
+    solar [options]
+
+Options:
+    -R, --render=<render_option>    The typology of render engine to be used. By
+                                    default it uses `matplotlib`. The other
+                                    option is to use the more fancy `opengl`.
+                                    [default: matplotlib]
+
+    --step=<step>                   Simulation step between each render
+                                    [default: 5]
+"""
+import numpy as np
+import importlib
+
+from docopt import docopt
+
+import pygalaxy
+from pygalaxy.barnes_hut_array import compute_energy
 
 
 def temp2color(temps):
@@ -41,11 +60,12 @@ def temp2color(temps):
 
 class Galaxy:
     def __init__(self, blackHole, dt=10., display_step=1):
-        self.mass, self.particles = nbody.init_collisions(blackHole)
-        #self.time_method = nbody.ADB6(dt, self.particles.shape[0], compute_energy)
-        #self.time_method = nbody.Euler_symplectic(dt, self.particles.shape[0], compute_energy)
-        self.time_method = nbody.Stormer_verlet(dt, self.particles.shape[0], compute_energy)
-        #self.time_method = nbody.Optimized_815(dt, self.particles.shape[0], compute_energy)
+        self.mass, self.particles = pygalaxy.init_collisions(blackHole)
+        # self.time_method = pygalaxy.ADB6(dt, self.particles.shape[0], compute_energy)
+        # self.time_method = pygalaxy.Euler_symplectic(dt, self.particles.shape[0], compute_energy)
+        # self.time_method = pygalaxy.Stormer_verlet(dt, self.particles.shape[0], compute_energy)
+        self.time_method = pygalaxy.Optimized_815(
+            dt, self.particles.shape[0], compute_energy)
         self.display_step = display_step
         self.it = 0
 
@@ -62,33 +82,48 @@ class Galaxy:
         speed_magnitude = np.linalg.norm(self.particles[:, 2:4], axis=1)
         speed_min = speed_magnitude.min()
         speed_max = speed_magnitude.max()
-        colors = temp2color(3000 + 6000*(speed_magnitude-speed_min)/(speed_max - speed_min))
+        colors = temp2color(
+            3000 + 6000*(speed_magnitude-speed_min)/(speed_max - speed_min))
         colors[:, 3] = 0.05
-        return colors + np.asarray([0., 0., 0., 0.95]) * np.minimum(self.mass, 20).reshape(-1, 1) / 20
+
+        return colors + np.asarray([0., 0., 0., 0.95]) * \
+            np.minimum(self.mass, 20).reshape(-1, 1) / 20
 
 
 if __name__ == '__main__':
-    import argparse
+    args = docopt(__doc__)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--render', default='matplotlib', help='Animation renderer')
-    parser.add_argument('--display_step', type=int, default=5, help='Simulation steps between each render')
-    args = parser.parse_args()
+    display_step = int(args['--step'])
+    render_engine = args['--render']
 
-    sys.path.append(args.render)
-    from animation import Animation
+    # Importing the right class for rendering from the right module
+    anim_module = importlib.import_module('pygalaxy.'+render_engine)
+    Animation = getattr(anim_module, 'Animation')
 
     np.random.seed(42)
 
     blackHole = [
-                {'coord': [0, 0], 'mass': 1000000, 'svel': 1, 'stars': 2000, 'radstars': 3},
-                {'coord': [3, 3], 'mass': 1000000, 'svel': 0.9, 'stars': 1000, 'radstars': 1}
-                ]
-    sim = Galaxy(blackHole, display_step=args.display_step)
+        {
+            'coord': [0, 0],
+            'mass': 1000000,
+            'svel': 1,
+            'stars': 2000,
+            'radstars': 3
+        },
+
+        {
+            'coord': [3, 3],
+            'mass': 1000000,
+            'svel': 0.9,
+            'stars': 1000,
+            'radstars': 1
+        }]
+
+    sim = Galaxy(blackHole, display_step=display_step)
 
     anim = Animation(sim, axis=[-10., 10., -10., 10.])
 
-    if args.render == 'opengl':
+    if args['--render'] == 'opengl':
         anim.use_colors = True
         anim.use_colors_update = False
         anim.use_adaptative_opacity = True
