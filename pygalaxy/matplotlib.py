@@ -39,7 +39,7 @@ class Animation(object):
 
     def main_loop(self):
         """ Animation main loop. """
-        # We need to keep the `anim` object around otherwise it is garbage
-        # collected
-        anim = animation.FuncAnimation(self.fig, self._update_coords, blit=True)
+        # We need to keep the animation object around otherwise it is garbage
+        # collected. So we use the dummy `_`
+        _ = animation.FuncAnimation(self.fig, self._update_coords, blit=True)
         plt.show()
