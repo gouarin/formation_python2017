@@ -32,9 +32,14 @@ class Animation(object):
         """ Update scatter coordinates. """
         self.simu.next()
         self.scatter.set_offsets(self.simu.coords())
+
+        # We need to return an iterable since FuncAnimation expects a returned
+        # object of this nature
         return self.scatter,
 
     def main_loop(self):
-        """ Simulation main loop. """
-        animation.FuncAnimation(self.fig, self._update_coords, blit=True)
+        """ Animation main loop. """
+        # We need to keep the `anim` object around otherwise it is garbage
+        # collected
+        anim = animation.FuncAnimation(self.fig, self._update_coords, blit=True)
         plt.show()
