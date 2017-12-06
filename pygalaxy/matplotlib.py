@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-class Animation:
+
+class Animation(object):
     """ Simulation renderer using matplotlib. """
 
     def __init__(self, simu, axis=[0, 1, 0, 1]):
@@ -20,13 +20,13 @@ class Animation:
 
         self.simu = simu
 
-        self.fig = plt.figure(figsize = (10,10))
+        self.fig = plt.figure(figsize=(10, 10))
         self.ax = self.fig.add_subplot(111)
         self.ax.set_facecolor('black')
         self.ax.axis(axis)
 
         coords = simu.coords()
-        self.scatter = plt.scatter(coords[:,0], coords[:,1], c='white', s=.5)
+        self.scatter = plt.scatter(coords[:, 0], coords[:, 1], c='white', s=.5)
 
     def _update_coords(self, i):
         """ Update scatter coordinates. """
@@ -36,7 +36,5 @@ class Animation:
 
     def main_loop(self):
         """ Simulation main loop. """
-        anim = animation.FuncAnimation(self.fig, self._update_coords, blit=True)
+        animation.FuncAnimation(self.fig, self._update_coords, blit=True)
         plt.show()
-
-

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -84,12 +83,24 @@ class Animation(object):
         glutCreateWindow(title)
 
         # Callbacks
-        glutDisplayFunc(self._draw)         # When the window must be redrawn
-        glutIdleFunc(self.draw_next_frame)  # When OpenGL gets bored
-        glutReshapeFunc(self._resize)       # When the window is resized
-        glutMouseFunc(self._mouse)          # When a mouse button is pressed/released
-        glutMotionFunc(self._motion)        # When the mouse moves with a pressed button
-        glutKeyboardFunc(self._keyboard)    # When a key is pressed
+        # When the window must be redrawn
+        glutDisplayFunc(self._draw)
+
+        # When OpenGL gets bored
+        glutIdleFunc(self.draw_next_frame)
+
+        # When the window is resized
+        glutReshapeFunc(self._resize)
+
+        # When a mouse button is
+        # pressed/released
+        glutMouseFunc(self._mouse)
+
+        # When the mouse moves with a pressed button
+        glutMotionFunc(self._motion)
+
+        # When a key is pressed
+        glutKeyboardFunc(self._keyboard)
 
         # Create a Vertex Buffer Object for the vertices
         coords = simu.coords()
@@ -441,7 +452,8 @@ class Animation(object):
         glutPostRedisplay()
 
     def reset_view(self):
-        """ Reset view accordingly to the particle coordinates and the tracked star. """
+        """ Reset view accordingly to the particle coordinates and the
+        tracked star. """
         border = 0.1
         coords = self.simu.coords()
         coord_min = coords.min(axis=0)
@@ -522,25 +534,38 @@ class Animation(object):
             elif button == GLUT_RIGHT_BUTTON:
                 self.mouse_action = 'zoom'
 
-        elif self.mouse_action is not None and state == GLUT_UP and button == self.button:
+        elif self.mouse_action is not None \
+                and state == GLUT_UP \
+                and button == self.button:
+
             self.mouse_action = None
 
     def _motion(self, x, y):
         """ Called when the mouse has move while a button is pressed. """
-        # Disable view translation when tracking a star, unless simulation is paused.
-        if self.mouse_action == 'move' and (self.tracked_star is None or self.is_paused):
-            self.axis.origin[0] = self.old_axis.origin[0] - self.old_axis.scale * (x - self.x_start)
-            self.axis.origin[1] = self.old_axis.origin[1] + self.old_axis.scale * (y - self.y_start)
+        # Disable view translation when tracking a star,
+        # unless simulation is paused.
+        if self.mouse_action == 'move' and \
+                (self.tracked_star is None or self.is_paused):
+            self.axis.origin[0] = self.old_axis.origin[0] - \
+                self.old_axis.scale * (x - self.x_start)
+            self.axis.origin[1] = self.old_axis.origin[1] + \
+                self.old_axis.scale * (y - self.y_start)
 
         elif self.mouse_action == 'zoom':
             zoom_factor = math.exp(0.01 * (self.y_start - y))
 
-            # By default, zooming is focused on the coordinates initialy pointed by the mouse
-            #   but if a star is tracked and the simulation is not paused,
-            #   then the focus is on this star.
+            # By default, zooming is focused on the coordinates initialy
+            # pointed by the mouse
+            # but if a star is tracked and the simulation is not paused,
+            # then the focus is on this star.
             if self.tracked_star is None or self.is_paused:
-                self.axis.origin[0] = self.old_axis.origin[0] + (1 - zoom_factor) * self.old_axis.scale * self.x_start
-                self.axis.origin[1] = self.old_axis.origin[1] + (1 - zoom_factor) * self.old_axis.scale * (self.size[1]-self.y_start)
+                self.axis.origin[0] = self.old_axis.origin[0] + \
+                    (1 - zoom_factor) * self.old_axis.scale * self.x_start
+
+                self.axis.origin[1] = self.old_axis.origin[1] + \
+                    (1 - zoom_factor) * self.old_axis.scale * \
+                    (self.size[1]-self.y_start)
+
                 self.axis.scale = zoom_factor * self.old_axis.scale
             else:
                 star_coords = self.simu.coords()[self.tracked_star]
@@ -590,7 +615,8 @@ class Animation(object):
 
         # Default position is the top-left corner
         pos = [self.axis.origin[0] + 9*pos[0]*self.axis.scale,
-               self.axis.origin[1] + (self.size[1] - 15*(pos[1]+1))*self.axis.scale]
+               self.axis.origin[1] + \
+               (self.size[1] - 15*(pos[1]+1))*self.axis.scale]
 
         glColor4f(*color)
         glRasterPos2f(*pos)
@@ -635,7 +661,8 @@ h: toggle help display""")
 
     def _find_nearest_star(self, x, y):
         """ Return the index of the nearest star from mouse coordinates. """
-        mouse_pos = self.axis.origin + self.axis.scale * np.asarray([x, self.size[1]-y])
+        mouse_pos = \
+            self.axis.origin + self.axis.scale * np.asarray([x, self.size[1]-y])
         return ((self.simu.coords() - mouse_pos) ** 2).sum(axis=1).argmin()
 
     def _calc_opacity_factor(self):
@@ -669,8 +696,9 @@ h: toggle help display""")
         # Choose appropriate shader program
         if self.use_adaptative_opacity:
             glUseProgram(self._ao_shader_program)
-            glUniform1f(glGetUniformLocation(self._ao_shader_program, 'opacity_factor'),
-                        self._calc_opacity_factor())
+            glUniform1f(glGetUniformLocation(
+                self._ao_shader_program, 'opacity_factor'),
+                self._calc_opacity_factor())
         else:
             glUseProgram(0)
 
@@ -695,7 +723,8 @@ h: toggle help display""")
         glUseProgram(self._nebulae_shader_program)
 
         def bind_uniform_1f(name, value):
-            glUniform1f(glGetUniformLocation(self._nebulae_shader_program, name), value)
+            glUniform1f(glGetUniformLocation(
+                self._nebulae_shader_program, name), value)
 
         bind_uniform_1f('opacity_factor', self._calc_opacity_factor())
         bind_uniform_1f('view_scale', self.axis.scale)
@@ -726,8 +755,10 @@ h: toggle help display""")
         # Update perspective transformation
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(self.axis.origin[0], self.axis.origin[0] + self.axis.scale * self.size[0],
-                self.axis.origin[1], self.axis.origin[1] + self.axis.scale * self.size[1],
+        glOrtho(self.axis.origin[0],
+                self.axis.origin[0] + self.axis.scale * self.size[0],
+                self.axis.origin[1],
+                self.axis.origin[1] + self.axis.scale * self.size[1],
                 -1, 1)
 
         # Background color
@@ -760,7 +791,6 @@ h: toggle help display""")
 # Demo
 if __name__ == '__main__':
     """ Demo """
-    import numpy as np
 
     class SpinningCloud:
         def __init__(self, size, theta=math.pi/18000):
