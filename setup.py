@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
+from Cython.Build import cythonize
 
 setup(
-    name           = "nbody",
-    packages       = find_packages(exclude=['tests*']),
+    name="pyGalaxy",
+    ext_modules=cythonize('pygalaxy/quadtree.pyx'),  # accepts a glob pattern
+    packages=find_packages(exclude=['tests*']),
 )
