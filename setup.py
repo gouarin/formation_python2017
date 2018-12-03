@@ -9,4 +9,7 @@ setup(
         'numba',
 
     ],
+    extras_require = {
+        'opengl': ["pyopengl"]
+    }
 )
